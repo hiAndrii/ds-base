@@ -1,0 +1,613 @@
+# Design System Base — Architecture
+
+> The reasoning, the rules, and the full token reference.
+> Written to be read equally well by a designer and by a language model.
+
+---
+
+## 1. Principles
+
+These are the rules the system is built on. Every decision below traces back to one
+of them.
+
+### 1.1 Tokens are a chain of decisions, not a list of values
+
+A raw hex is a fact. A token is a decision *about* that fact. The value of a design
+system is in the decisions, so each one gets its own layer:
+
+| Layer | Question it answers | Example |
+|---|---|---|
+| Primitive | What values exist at all? | `indigo/600 = #4F46E5` |
+| Dial | Which of them is *ours*? | `accent/600 → indigo/600` · `radius/md → radius/12` |
+| Theme | What does that mean on this surface? | `bg/accent → accent/600` |
+| Component | What does this button use? | `fill → bg/accent` |
+
+There are five dials, not one. **Brand** answers the colour question, **Shape** the
+roundness question, **Typography** the typeface question, **Space & Size** the
+density question, **Theme** the light/dark question.
+
+Collapsing two layers looks like a simplification and always costs you later. If
+`Button.fill` points straight at `indigo/600`, re-skinning means editing every
+component. If it points at `bg/accent`, re-skinning is a mode switch.
+
+### 1.2 Name tokens by role, never by appearance
+
+`text/danger`, not `text/red`. The name has to survive a redesign. When Banking's
+error colour becomes crimson, `text/danger` is still correct and `text/red` is a lie
+that no one dares rename because 200 components depend on it.
+
+Semantic names also make the system legible to a model: an agent reading
+`bg/accent-subtle` knows what it is for. Reading `bg/indigo-50` it can only guess.
+
+### 1.3 Primitives are hidden; semantics are the public API
+
+Every primitive has `scopes = []`, so it appears in no Figma picker. A designer
+physically cannot reach `indigo/600`. This is what keeps the system from eroding —
+the guardrail is structural, not a convention people are asked to remember.
+
+### 1.4 Independent dials stay independent
+
+Niche and density are different questions. A Healthcare product can be dense; an AI
+product can be airy. They are two collections with two mode axes, not one enum with
+24 combinations. Cross-multiplying independent concerns is how token sets reach a
+thousand entries and stop being maintainable.
+
+### 1.5 One measurement grid
+
+Every spacing, sizing and radius value is a multiple of 4. No exceptions in the
+layout system. Three things are deliberately outside it:
+
+- **Stroke widths** (1, 1.5, 2, 3) — hairlines are a rendering concern, not a layout one.
+- **Font sizes** (11, 13, 14, 18) — type scales are tuned optically; forcing them onto
+  a 4pt grid produces bad typography. Line-heights *are* on the grid, which is what
+  keeps vertical rhythm intact.
+- **`space/optical` (2px)** — an optical correction, not a layout decision. See §1.6.
+
+Each exemption is a *rendering* concern. The grid governs layout, and layout only.
+
+### 1.6 Optical correction is measured, not eyeballed
+
+An icon drawn on a 24px grid occupies a 20px live area — its box carries ~2px of
+built-in whitespace on every side. Give a button equal padding on both ends and the
+icon side reads looser, while the label looks shoved against the opposite edge. The
+geometry is symmetric; the perception is not.
+
+The correction is a 2px auto-layout wrapper on the **label only**. One wrapper does
+two jobs at once: it pushes the text off its outer edge by the amount the icon
+already had, and it opens the icon-to-label gap. The icon is never touched, so the
+correction cannot drift when an icon is swapped.
+
+This is why the box gap between icon and label is `space/2xs` (4px) and not 8px —
+with the wrapper's 2px plus the icon's own ~2px inset, 4px of box gap reads as
+roughly 8px of air. Measure the live area, then compensate for it. Do not nudge.
+
+Applied to: Button, Badge, Input.
+
+### 1.7 Component variants encode state; component properties encode content
+
+A variant axis is for things that change the component's *appearance rules*
+(`Variant`, `Size`, `State`). A component property is for things that change its
+*contents* (`Label`, `Icon left`, `Show status`). Putting content in variants is the
+single fastest way to a 400-variant component set nobody can use.
+
+### 1.8 Accessibility is a token decision, not a review step
+
+White on emerald/600 is 3.7:1 — a fail. There are two ways to fix that: darken the
+text, or darken the fill. The system darkens the **fill**.
+
+Darkening the text works mathematically and looks wrong: a near-black label on a
+bright button reads as disabled, and it forces every consumer to remember which
+tones flipped. Darkening the fill keeps one rule instead of eight exceptions:
+
+> **Every solid fill in the system carries a white label.**
+
+So `accent/solid` resolves one ramp step deeper for bright hues (orange, cyan,
+emerald, teal) than for blues and violets, and the solid status fills sit at
+emerald/700, amber/700, red/600 and blue/600 rather than at their 500s and 600s.
+Solid fills also do **not** lighten in Dark mode, because the label is white in both
+themes and a lighter fill would drop below 4.5:1.
+
+The correct choice is the default choice, and there is nothing to remember.
+
+---
+
+## 2. Architecture
+
+### 2.1 Collections
+
+| # | Collection | Modes | Vars | Scopes |
+|---|---|---|---|---|
+| 1 | `1. Primitives` | Value | 260 | `[]` — hidden everywhere |
+| 2 | `2. Brand` | Base, Healthcare, AI, Banking, E-commerce, Crypto, Education, Wellness | 28 | `[]` — reached through Theme |
+| 3 | `3. Theme` | Light, Dark | 77 | fill / text / stroke / effect |
+| 4 | `4. Space & Size` | Default, Compact, Comfortable | 48 | gap / width-height / stroke-float |
+| 5 | `5. Shape` | Soft, Crisp, Sharp, Rounded | 9 | corner-radius |
+| 6 | `6. Typography` | Studio, Editorial, Technical, Expressive | 79 | font-family / size / line-height / letter-spacing / font-style |
+
+501 variables. Four of the six are dials a designer switches from the Appearance
+panel; Primitives and Theme are machinery.
+
+### 2.1a Why shape and typeface are their own dials
+
+They began inside Brand — `Healthcare` meant teal *and* Plus Jakarta Sans *and*
+generous radii, in one switch. Convenient, and wrong: that produces eight presets,
+not a system. A fintech product may want Banking's blue with Rounded corners; an AI
+tool may want violet with a Technical typeface.
+
+Splitting them turns 8 presets into 8 × 4 × 4 × 3 = **384 legitimate combinations**
+from the same components. The cost is that a niche is no longer a single switch, so
+the recommended combinations are written down instead — see §6.
+
+### 2.2 Why Brand sits between Primitives and Theme
+
+The obvious design puts semantic colour directly on primitives and gives the Theme
+collection one mode per niche per theme: `Light`, `Dark`, `Healthcare Light`,
+`Healthcare Dark`… That is 16 modes for 8 niches, and every new niche means editing
+77 semantic tokens twice.
+
+Inserting Brand collapses it. Brand exposes an 11-step `accent/*` ramp and a 13-step
+`neutral/*` ramp. Theme aliases those ramps and knows nothing about hue. A new niche
+is 25 aliases in one collection — Theme is untouched, and both themes get it free.
+
+```
+Theme::bg/accent  →  Brand::accent/600  →  Primitives::indigo/600   (Base)
+                                        →  Primitives::teal/600     (Healthcare)
+                                        →  Primitives::violet/600   (AI)
+```
+
+### 2.3 Why typography binds through variables rather than hardcoding
+
+Each of the 19 text styles has all five properties bound to variables:
+
+```
+Heading/LG
+  fontFamily    → Typography::font/display
+  fontStyle     → Typography::heading-lg/weight
+  fontSize      → Typography::heading-lg/size
+  lineHeight    → Typography::heading-lg/line-height
+  letterSpacing → Typography::heading-lg/tracking
+```
+
+Switching a frame to Typography `Editorial` re-typesets every text node in it. No
+style swapping, no detaching.
+
+**Font sizes are identical in all four Typography modes.** Character comes from
+typeface, leading, tracking and weight — never from size. That is deliberate:
+switching typography restyles a finished layout without reflowing it.
+
+This is why all typefaces in the system share Figma style names — `Regular`, `Medium`,
+`SemiBold`, `Bold`. Inter spells it `Semi Bold`, which breaks the binding the moment
+the family changes, so Inter is deliberately *not* one of the four here. Geist, Plus
+Jakarta Sans, Manrope, IBM Plex Sans and Instrument Sans all agree.
+
+---
+
+## 3. Naming
+
+```
+<group>/<role>[-<modifier>][-<state>]
+```
+
+| Group | Applies to | Scopes |
+|---|---|---|
+| `bg/` | frame + shape fills | `FRAME_FILL`, `SHAPE_FILL` |
+| `text/` | text fills | `TEXT_FILL` |
+| `icon/` | icon strokes + fills | `SHAPE_FILL`, `STROKE_COLOR` |
+| `border/` | strokes | `STROKE_COLOR` |
+| `effect/` | shadow + ring colours | `EFFECT_COLOR` |
+| `space/` | padding + gaps | `GAP` |
+| `size/` | widths + heights | `WIDTH_HEIGHT` |
+| `radius/` | corner radii | `CORNER_RADIUS` |
+| `border-width/` | stroke weights | `STROKE_FLOAT` |
+
+**Modifiers**: `-subtle` (tinted, low emphasis) · `-strong` (raised emphasis) ·
+`-raised` / `-sunken` (elevation) · `on-<surface>` (foreground for a specific fill).
+
+**States**: `-hover` · `-active` · `-disabled`. A token without a state suffix is the
+rest state.
+
+**Components**: `PascalCase` singular — `Button`, not `Buttons`.
+**Variants**: `Property=Value` — `Variant=Primary, Size=MD, State=Default`.
+**Icons**: `Icon / kebab-case` — `Icon / chevron-down`.
+
+---
+
+## 4. Token reference
+
+### 4.1 Primitives
+
+| Family | Steps | Purpose |
+|---|---|---|
+| `gray` | 0, 50–950, 1000 | Neutral, a hair cool. Base + AI + Crypto |
+| `slate` | 0, 50–950, 1000 | Cool blue-tinted neutral. Banking |
+| `sand` | 0, 50–950, 1000 | Warm neutral. Healthcare, E-commerce, Education, Wellness |
+| `blue` `indigo` `violet` `cyan` `teal` `emerald` `amber` `orange` `red` `rose` | 50–950 | Accent + status hues |
+| `alpha-black` `alpha-white` | 4, 8, 12, 16, 24, 32, 48, 64, 80 | Scrims, washes, shadows |
+| `dimension` | 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 48, 56, 64, 80, 96, 128, 160 | The 4pt grid |
+| `radius` | 0, 4, 8, 12, 16, 20, 24, 32, 9999 | Corner radii |
+| `font-size` | 10–72 (optical) | Type sizes |
+| `line-height` | 12–80 (4pt grid) | Type leading |
+| `font-weight` | 300–800 | Numeric weights |
+| `font-style` | light, regular, medium, semibold, bold | Figma style strings |
+| `font-family` | 8 families | Typefaces |
+| `stroke` | 0, 1, 1.5, 2, 3 | Hairlines |
+| `opacity` | 0–100 by 10 | Opacity steps |
+
+### 4.2 Brand — the colour dial
+
+Brand carries colour identity and nothing else. 25 tokens: an 11-step `accent/*`
+ramp, a 13-step `neutral/*` ramp, and `accent/contrast`.
+
+| Niche | Accent | Neutral | `accent/solid` | White on it |
+|---|---|---|---|---|
+| Base | indigo | gray (cool) | indigo/600 | 6.3:1 |
+| Healthcare | teal | sand (warm) | teal/700 | 5.5:1 |
+| AI | violet | gray | violet/600 | 5.7:1 |
+| Banking | blue | slate (cool blue) | blue/600 | 5.2:1 |
+| E-commerce | orange | sand | orange/700 | 5.2:1 |
+| Crypto | cyan | gray | cyan/700 | 5.4:1 |
+| Education | rose | sand | rose/600 | 4.7:1 |
+| Wellness | emerald | sand | emerald/700 | 5.5:1 |
+
+`accent/solid`, `accent/solid-hover` and `accent/solid-active` are the ramp steps
+used for **filled** accent surfaces. Bright hues sit one step deeper than blues and
+violets, which is what lets every niche carry a white label (§1.8).
+
+That same step doubles as the accent colour that is legible **as text on a light
+surface**, so `text/accent`, `icon/accent` and `border/accent` alias it too. One
+token, two contrast problems solved.
+
+`accent/contrast` is the foreground on a solid accent fill. It is `gray/0` in every
+niche — the token stays so a future brand with a genuinely light accent can flip it.
+
+Typefaces and corner radii used to live here. They now have their own dials — see
+§4.3 and §4.6.
+
+### 4.3 Theme — semantic colour (Light → Dark)
+
+**Surfaces**
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `bg/canvas` | neutral/0 | neutral/950 | Page background |
+| `bg/canvas-subtle` | neutral/50 | neutral/900 | Page background, one step in |
+| `bg/surface` | neutral/0 | neutral/900 | Cards, panels, sheets |
+| `bg/surface-raised` | neutral/0 | neutral/800 | Surfaces above other surfaces |
+| `bg/surface-sunken` | neutral/50 | neutral/950 | Wells, code blocks, insets |
+| `bg/surface-hover` | neutral/50 | neutral/800 | Hovered rows and surfaces |
+| `bg/surface-active` | neutral/100 | neutral/700 | Pressed surfaces |
+| `bg/inverse` | neutral/900 | neutral/50 | Tooltips, inverted chips |
+| `bg/overlay` | alpha-black/48 | alpha-black/64 | Modal scrim |
+| `bg/disabled` | neutral/100 | neutral/800 | Disabled control fill |
+| `bg/skeleton` | neutral/100 | neutral/800 | Loading placeholders |
+| `bg/track` | neutral/200 | neutral/700 | Slider, switch and progress tracks |
+| `bg/hover-overlay` | alpha-black/4 | alpha-white/8 | Wash over transparent controls |
+| `bg/active-overlay` | alpha-black/8 | alpha-white/12 | Pressed wash |
+
+**Accent + neutral fills**
+
+| Token | Light | Dark |
+|---|---|---|
+| `bg/accent` | accent/600 | accent/500 |
+| `bg/accent-hover` | accent/700 | accent/400 |
+| `bg/accent-active` | accent/800 | accent/300 |
+| `bg/accent-subtle` | accent/50 | accent/950 |
+| `bg/accent-subtle-hover` | accent/100 | accent/900 |
+| `bg/neutral` | neutral/100 | neutral/800 |
+| `bg/neutral-hover` | neutral/200 | neutral/700 |
+| `bg/neutral-active` | neutral/300 | neutral/600 |
+
+Note the direction flip: accent gets *darker* on hover in Light and *lighter* in
+Dark. Hover always means "more contrast against the page", which is the opposite
+numeric direction in each theme.
+
+**Status fills** — `bg/success` (emerald/700) `bg/warning` (amber/700)
+`bg/danger` (red/600) `bg/info` (blue/600), each with a `-subtle` tint; danger also
+has `-hover` and `-active`. All four are identical in Light and Dark: they carry a
+white label in both, and lightening them in Dark would drop below 4.5:1.
+
+**Text**
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `text/primary` | neutral/900 | neutral/50 | Body and headings |
+| `text/secondary` | neutral/600 | neutral/400 | Supporting copy, captions |
+| `text/tertiary` | neutral/500 | neutral/500 | Metadata, timestamps |
+| `text/placeholder` | neutral/400 | neutral/600 | Empty field hints |
+| `text/disabled` | neutral/400 | neutral/600 | Disabled labels |
+| `text/on-accent` | accent/contrast | accent/contrast | On a solid accent fill |
+| `text/on-solid` | gray/0 | gray/0 | On danger / info solids |
+| `text/on-success` | gray/950 | gray/950 | On an emerald solid |
+| `text/on-warning` | gray/950 | gray/950 | On an amber solid |
+| `text/on-inverse` | neutral/0 | neutral/900 | On `bg/inverse` |
+| `text/accent` | accent/600 | accent/400 | Links, emphasised text |
+| `text/success` `text/warning` `text/danger` `text/info` | 700 | 400 | Status copy |
+
+**Icon** — mirrors text: `icon/primary` `secondary` `tertiary` `disabled` `accent`
+`on-accent` `on-solid` `on-inverse` `success` `warning` `danger` `info`.
+
+**Border** — `border/subtle` `default` `strong` `inverse` `disabled` `accent`
+`accent-subtle` `focus` `success` `warning` `danger` `info`.
+
+**Effect** — `effect/shadow-sm|md|lg|xl` and `effect/focus-ring`. Shadow colours
+darken in Dark mode (alpha 8% → 48%) because a shadow tuned for white disappears on
+near-black.
+
+### 4.4 Space & Size — the density dial
+
+| Token | Default | Compact | Comfortable |
+|---|---|---|---|
+| `space/0` | 0 | 0 | 0 |
+| `space/2xs` | 4 | 4 | 4 |
+| `space/xs` | 8 | 4 | 8 |
+| `space/sm` | 12 | 8 | 16 |
+| `space/md` | 16 | 12 | 20 |
+| `space/lg` | 24 | 16 | 32 |
+| `space/xl` | 32 | 24 | 40 |
+| `space/2xl` | 40 | 32 | 48 |
+| `space/3xl` | 48 | 40 | 64 |
+| `space/4xl` | 64 | 48 | 80 |
+| `space/5xl` | 96 | 64 | 128 |
+| `space/optical` | 2 | 2 | 2 |
+
+| Control height | Default | Compact | Comfortable |
+|---|---|---|---|
+| `size/control/xs` | 24 | 20 | 28 |
+| `size/control/sm` | 32 | 28 | 36 |
+| `size/control/md` | 40 | 36 | 48 |
+| `size/control/lg` | 48 | 40 | 56 |
+| `size/control/xl` | 56 | 48 | 64 |
+
+Density-invariant by design (icons live on a pixel grid; rescaling them per density
+degrades rendering):
+
+- `size/icon/*` — 12, 16, 20, 24, 32
+- `size/avatar/*` — 24, 32, 40, 48, 64, 96; `status-*` 8, 12, 16, 24 (~25% of the avatar)
+- `size/selection/*` — 16, 20; `dot` 8
+- `size/switch/*` — track 32×20 / 40×24, knob 12 / 16
+- `size/badge/*` — 20, 24
+- `border-width/*` — 0, 1, 1.5, 2, 3
+
+`space/optical` is the one Space token that is not an alias to the dimension
+scale. It is a literal 2px, and the only value in the system allowed to sit off the
+4pt grid for a layout-adjacent reason — see §1.6.
+
+### 4.5 Shape — the roundness dial
+
+Nine radius tokens, four modes. Every value is a multiple of 4; `full` (9999) is the
+pill sentinel and the single exception.
+
+| Token | Soft | Crisp | Sharp | Rounded |
+|---|---|---|---|---|
+| `radius/none` | 0 | 0 | 0 | 0 |
+| `radius/xs` | 4 | 4 | 0 | 8 |
+| `radius/sm` | 8 | 4 | 0 | 16 |
+| `radius/md` | 12 | 8 | 4 | 20 |
+| `radius/lg` | 16 | 12 | 4 | 24 |
+| `radius/xl` | 20 | 16 | 8 | 32 |
+| `radius/2xl` | 24 | 20 | 8 | 32 |
+| `radius/3xl` | 32 | 24 | 12 | 32 |
+| `radius/full` | pill | pill | pill | pill |
+
+**Soft** is the house default. **Crisp** tightens it for dense product UI. **Sharp**
+reads institutional — banking, enterprise, technical. **Rounded** reads consumer —
+wellness, education, lifestyle.
+
+Radius carries more personality per unit of effort than any other dial. Change it
+before reaching for anything else.
+
+### 4.6 Typography — the type dial
+
+Four modes. Each sets the typefaces and the character of the ramp; **font sizes are
+identical in every mode**, so switching typography restyles a layout without
+reflowing it.
+
+| Mode | Display + Body | Mono | Character |
+|---|---|---|---|
+| **Studio** | Geist | Geist Mono | Neutral modern grotesque. The house voice. |
+| **Editorial** | Plus Jakarta Sans | JetBrains Mono | Humanist and airy — +4px leading on body roles, looser tracking. |
+| **Technical** | IBM Plex Sans | JetBrains Mono | Institutional and tight — lighter display weight, near-zero tracking, wider small-caps. |
+| **Expressive** | Manrope | Geist Mono | Geometric and loud — Bold display, tightest tracking. |
+
+**The 19 type roles** (size is constant across modes):
+
+| Role | Size | Line-height (Studio) | Weight (Studio) | Family |
+|---|---|---|---|---|
+| `display-2xl` | 72 | 80 | SemiBold | display |
+| `display-xl` | 56 | 64 | SemiBold | display |
+| `display-lg` | 48 | 56 | SemiBold | display |
+| `heading-xl` | 40 | 48 | SemiBold | display |
+| `heading-lg` | 32 | 40 | SemiBold | display |
+| `heading-md` | 24 | 32 | SemiBold | display |
+| `heading-sm` | 20 | 28 | SemiBold | body |
+| `heading-xs` | 16 | 24 | SemiBold | body |
+| `body-lg` | 18 | 28 | Regular | body |
+| `body-md` | 16 | 24 | Regular | body |
+| `body-sm` | 14 | 20 | Regular | body |
+| `body-xs` | 12 | 16 | Regular | body |
+| `label-lg` | 16 | 20 | Medium | body |
+| `label-md` | 14 | 20 | Medium | body |
+| `label-sm` | 12 | 16 | Medium | body |
+| `label-xs` | 11 | 16 | Medium | body |
+| `code-md` | 14 | 20 | Regular | mono |
+| `code-sm` | 12 | 16 | Regular | mono |
+| `overline` | 11 | 16 | SemiBold | body |
+
+Each role owns four tokens — `size`, `line-height`, `tracking`, `weight` — plus the
+three shared `font/display`, `font/body`, `font/mono` families. Tracking tightens as
+size grows: an optical correction, not decoration. `overline` is the only role that
+expects manual uppercasing.
+
+What varies per mode: **line-height** on body and label roles, **tracking** on
+display and heading roles, **weight** on display roles, and the **families**.
+
+### 4.7 Elevation
+
+| Style | Shadow | Use |
+|---|---|---|
+| `Elevation/XS` | 0 1 2 | Inputs at rest, table headers |
+| `Elevation/SM` | 0 1 2 + 0 2 4 −1 | Resting cards, chips |
+| `Elevation/MD` | 0 4 8 −2 + 0 2 4 −2 | Hovered cards |
+| `Elevation/LG` | 0 12 16 −4 + 0 4 6 −2 | Popovers, menus, tooltips |
+| `Elevation/XL` | 0 20 24 −4 + 0 8 8 −4 | Dialogs, sheets |
+| `Elevation/2XL` | 0 32 64 −12 | Full-screen modals |
+| `Focus/Ring` | 0 0 0 +3 spread | Keyboard focus halo |
+| `Focus/Ring Danger` | 0 0 0 +3 spread | Focus on a destructive control |
+| `Inset/Sunken` | inner 0 1 2 | Pressed wells, code blocks |
+
+---
+
+## 5. Adding a new niche
+
+A niche is 25 aliases in one collection. Nothing else in the system changes.
+
+1. **Pick an accent hue and a neutral.** Accent from the primitive ramps; neutral
+   from `gray` (cool), `slate` (corporate blue-grey) or `sand` (warm).
+2. **Check the contrast.** Compute white on `<hue>/600`. Below 4.5:1, set
+   `accent/contrast` to `gray/950` instead of `gray/0`. Bright hues — amber, orange,
+   emerald, cyan, lime — always fail; blues, indigos, violets and roses pass.
+3. **Add the mode** to `2. Brand`.
+4. **Fill the aliases**: `accent/50…950` → the hue ramp, `neutral/0…1000` → the
+   neutral ramp, `accent/contrast`.
+5. **Add one card to the Brand sweep in Theme Lab.** That sweep is the acceptance
+   test for the niche — if the card reads correctly, the niche is done.
+
+Shape and typeface are no longer part of a niche. Pair the brand with a Shape and a
+Typography mode instead — see §6.
+
+---
+
+## 6. Dial recipes
+
+The dials are independent, which means a niche is a *combination*, not a switch.
+These are the combinations worth starting from.
+
+| Product kind | Brand | Shape | Typography | Density |
+|---|---|---|---|---|
+| Generic SaaS | Base | Soft | Studio | Default |
+| Healthcare / clinical | Healthcare | Rounded | Editorial | Comfortable |
+| AI / developer tool | AI | Crisp | Expressive | Default |
+| Banking / enterprise | Banking | Sharp | Technical | Compact |
+| E-commerce / retail | E-commerce | Soft | Studio | Default |
+| Crypto / web3 | Crypto | Crisp | Technical | Compact |
+| Education / learning | Education | Rounded | Editorial | Comfortable |
+| Wellness / lifestyle | Wellness | Rounded | Expressive | Comfortable |
+| Analytics dashboard | any | Crisp | Studio | Compact |
+| Marketing site | any | Soft | Expressive | Comfortable |
+
+A recipe is a starting point, not a rule. The value of independent dials is being
+able to leave one.
+
+---
+
+## 7. Adding a new component
+
+1. **Check the token layer first.** List every colour, space and size the component
+   needs. If one has no semantic token, add the token before drawing anything. A
+   component that hardcodes a value is a component that breaks on the next re-skin.
+2. **Decide the variant axes.** Only properties that change *appearance rules*.
+   Content goes in component properties. Keep the matrix under ~30 unless the
+   component genuinely ships a full state grid (Button does; most do not).
+3. **Build with auto-layout.** Fixed height from `size/control/*`, horizontal padding
+   and gap from `space/*`, radius from `radius/*`, every fill and stroke from a
+   semantic token.
+4. **Wire the properties.** `TEXT` for labels, `BOOLEAN` for optional parts,
+   `INSTANCE_SWAP` for icons. Never a variant per icon.
+5. **Write the description.** Purpose, properties, when to use, when not to, what it
+   composes with, which tokens it consumes. This is what an agent reads.
+6. **Put it in the Theme Lab specimen.** An atom that is not in the specimen is an
+   atom the lab does not test. If it cannot go in without special-casing, its API is
+   wrong — fix the API, not the specimen.
+7. **Verify across dials.** Shape `Sharp` and `Rounded`, Theme `Dark`, Density
+   `Compact`, Typography `Editorial`. If any of them breaks it, it is not finished.
+
+---
+
+## 8. Accessibility contract
+
+- Body text meets **4.5:1**; text ≥ 24px or bold ≥ 18.66px meets **3:1**.
+- Interactive controls and their focus indicators meet **3:1** against the adjacent
+  surface.
+- Focus is never removed. `Focus/Ring` plus `border/focus` is the pattern.
+- Minimum touch target **44×44** on touch surfaces. `size/control/sm` (32px) is a
+  pointer-only size — pad it out on mobile.
+- Colour is never the only carrier of meaning. A status badge carries a word; an
+  invalid input carries a message.
+- Every solid fill carries a white label. If a fill cannot support white at 4.5:1,
+  the fill moves one ramp step deeper — the label never darkens.
+- Disabled controls are exempt from contrast requirements but are still drawn to be
+  recognisable as controls — `text/disabled` sits at neutral/400, not neutral/300.
+
+---
+
+## 9. Theme Lab
+
+`Theme Lab` is where the system is proved rather than described.
+
+### What it is
+
+Two components, each instanced 21 times. Every instance is identical except for the
+modes pinned on it.
+
+| Specimen | Covers |
+|---|---|
+| `Theme Lab / Specimen` | Avatar, Badge, Input, Switch, Checkbox, Separator, Button |
+| `Theme Lab / Specimen B` | Image, Number Input, Color Picker, Textarea, Progress, Label, Slider, Chip, Toggle, Rating, Skeleton |
+
+Together they cover all 20 atoms. Five sweeps, one per dial, each with a row of
+Specimen A and a row of Specimen B:
+
+| Sweep | Cards per row | Holds constant |
+|---|---|---|
+| Brand | 8 | Light · Default · Soft · Studio |
+| Color | 2 | Base · Default · Soft · Studio |
+| Shape | 4 | Base · Light · Default · Studio |
+| Density | 3 | Base · Light · Soft · Studio |
+| Typography | 4 | Base · Light · Default · Soft |
+
+### Why it exists
+
+A token graph can be perfectly correct in the variables panel and still fall apart
+on a real surface. Three classes of bug appear only here:
+
+- **Theme-conditional.** A frame with a default white fill is invisible in Light and
+  wrecks the card in Dark. Not hypothetical: building this page is what surfaced 74
+  such frames across the file, all left behind by `createAutoLayout` defaults.
+- **Brand-conditional.** A foreground that passes contrast on indigo and fails on
+  emerald. Only a side-by-side sweep makes that obvious.
+- **Shape- and density-conditional.** A missed radius binding shows up the instant
+  one corner refuses to tighten with the others.
+
+It is also the sales surface. These sweeps are what demonstrate that one kit covers
+eight niches, two themes, four shapes and four typographic voices.
+
+### Rules
+
+1. **One component, many instances.** Never duplicate and edit a card.
+2. **A sweep changes exactly one dial.** Everything else sits at the baseline. A card
+   that differs in two dials tells you nothing about either.
+3. **Every instance pins all five modes explicitly**, including the ones it is not
+   testing. An unpinned instance inherits the collection default and silently stops
+   being a control case.
+4. **The specimens between them consume every atom.** Adding an atom means adding
+   it to A or B.
+5. **Nothing in a card is hardcoded.** A card that needs a value the tokens do not
+   have is a finding — add the token, do not paint the card.
+
+### The loop
+
+Change a token or a component → open Theme Lab → read across the rows. The lab
+re-renders itself; you never update it. Read across a row rather than down a column:
+the eye catches a break in a sweep far faster than in an isolated card.
+
+### Checklist per pass
+
+- **Dark** — no white boxes behind text.
+- **Every brand** — the `Save changes` label is white and legible on all eight
+  accents. If one looks washed out, `accent/solid` for that niche is a step too
+  shallow.
+- **Compact** — nothing collides, nothing truncates that should not.
+- **Sharp** — card, input and button corners all tighten together. One that does not
+  is a missed binding.
+- **Editorial** — the card grows taller and nothing overlaps. Leading changes, sizes
+  do not.
