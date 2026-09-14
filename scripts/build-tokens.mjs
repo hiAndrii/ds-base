@@ -26,12 +26,16 @@ const OUTPUT = resolve(ROOT, 'src/styles/tokens.css');
 
 // Each dial collection -> the attribute it drives and its default mode.
 // The default mode is written to :root so an attribute-less page is correct.
+// `guard` is a prefix that marks a tier as not-public. Primitives carry --p-,
+// Brand carries --b-: both exist only so the tier above them can resolve, and
+// neither is something a component may reference. It mirrors their empty
+// `scopes` in Figma, where they are equally unreachable.
 const DIALS = {
-  brand: { attr: 'data-brand', default: 'Base' },
-  theme: { attr: 'data-theme', default: 'Light' },
-  space: { attr: 'data-density', default: 'Default' },
-  shape: { attr: 'data-shape', default: 'Soft' },
-  typography: { attr: 'data-type', default: 'Studio' },
+  brand: { attr: 'data-brand', default: 'Base', guard: 'b-' },
+  theme: { attr: 'data-theme', default: 'Light', guard: '' },
+  space: { attr: 'data-density', default: 'Default', guard: '' },
+  shape: { attr: 'data-shape', default: 'Soft', guard: '' },
+  typography: { attr: 'data-type', default: 'Studio', guard: '' },
 };
 
 // Figma style strings -> numeric CSS font-weight. Weight tokens alias
@@ -51,16 +55,20 @@ const UNITLESS_GROUPS = new Set(['opacity', 'font-weight']);
 
 const tokens = JSON.parse(readFileSync(INPUT, 'utf8'));
 
-// Names that live in the primitives collection. Used to decide whether an
-// alias resolves to a hidden primitive (--p-) or a semantic token (--).
+// Names that live in the guarded tiers. Used to decide which prefix an alias
+// resolves to. Token names are unique across collections — `radius/md` is Shape,
+// `radius/12` is a primitive — so an exact-name lookup is unambiguous.
 const primitiveNames = new Set(Object.keys(tokens.primitives.tokens));
+const brandNames = new Set(Object.keys(tokens.brand.tokens));
+const guardFor = (name) =>
+  primitiveNames.has(name) ? 'p-' : brandNames.has(name) ? 'b-' : '';
 
 const isAlias = (v) => typeof v === 'string' && /^\{.+\}$/.test(v);
 const aliasTarget = (v) => v.slice(1, -1); // "{indigo/50}" -> "indigo/50"
 const group = (name) => name.split('/')[0]; // "font-size/14" -> "font-size"
 
-// "bg/canvas" -> "--bg-canvas"; primitives get the --p- guard prefix.
-const varName = (name, primitive) => `--${primitive ? 'p-' : ''}${name.replaceAll('/', '-')}`;
+// "bg/canvas" -> "--bg-canvas"; guarded tiers get their prefix.
+const varName = (name, guard = '') => `--${guard}${name.replaceAll('/', '-')}`;
 
 // Turn a token value into the right-hand side of a CSS declaration.
 function formatValue(name, value) {
@@ -73,7 +81,7 @@ function formatValue(name, value) {
 
   if (isAlias(value)) {
     const target = aliasTarget(value);
-    return `var(${varName(target, primitiveNames.has(target))})`;
+    return `var(${varName(target, guardFor(target))})`;
   }
 
   if (typeof value === 'number') {
@@ -87,17 +95,30 @@ function formatValue(name, value) {
 }
 
 // Build "  --name: value;" lines for a flat { name: value } map.
-function declarations(map) {
+function declarations(map, guard = '') {
   return Object.entries(map)
-    .map(([name, value]) => `  ${varName(name, false)}: ${formatValue(name, value)};`)
+    .map(([name, value]) => `  ${varName(name, guard)}: ${formatValue(name, value)};`)
     .join('\n');
 }
 
 // Primitive declarations, all with the --p- prefix.
 function primitiveDeclarations() {
   return Object.entries(tokens.primitives.tokens)
-    .map(([name, value]) => `  ${varName(name, true)}: ${formatValue(name, value)};`)
+    .map(([name, value]) => `  ${varName(name, 'p-')}: ${formatValue(name, value)};`)
     .join('\n');
+}
+
+// One effect style -> a full box-shadow value.
+// Geometry is baked in; the colour stays a var() reference to a Theme token, so
+// switching data-theme re-resolves the shadow without a rebuild. That is the
+// whole reason the colour is stored as an alias rather than a literal.
+function shadowValue(name, layers) {
+  return layers
+    .map((l) => {
+      const inset = l.type === 'inset' ? 'inset ' : '';
+      return `${inset}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px ${formatValue(name, l.color)}`;
+    })
+    .join(', ');
 }
 
 // One mode of a dial collection -> a flat { name: value } map.
@@ -120,15 +141,27 @@ blocks.push(
 const rootParts = [primitiveDeclarations()];
 for (const [key, cfg] of Object.entries(DIALS)) {
   rootParts.push(`  /* ${key}: ${cfg.default} (default) */`);
-  rootParts.push(declarations(modeMap(tokens[key], cfg.default)));
+  rootParts.push(declarations(modeMap(tokens[key], cfg.default), cfg.guard));
 }
+
+// Effect styles are not a dial — the geometry is the same in every mode, so
+// they are written once. Only their colour moves, and it moves on its own.
+if (tokens.effects) {
+  rootParts.push(`  /* effects: geometry fixed, colour follows the theme */`);
+  rootParts.push(
+    Object.entries(tokens.effects.tokens)
+      .map(([name, def]) => `  ${varName(name)}: ${shadowValue(name, def.layers)};`)
+      .join('\n')
+  );
+}
+
 blocks.push(`:root {\n${rootParts.join('\n')}\n}`);
 
 // One selector per mode of every dial, so any dial can be set in a subtree.
 for (const [key, cfg] of Object.entries(DIALS)) {
   for (const mode of tokens[key].modes) {
     const selector = `[${cfg.attr}="${mode.toLowerCase()}"]`;
-    blocks.push(`${selector} {\n${declarations(modeMap(tokens[key], mode))}\n}`);
+    blocks.push(`${selector} {\n${declarations(modeMap(tokens[key], mode), cfg.guard)}\n}`);
   }
 }
 
@@ -139,5 +172,6 @@ writeFileSync(OUTPUT, css, 'utf8');
 
 console.log(
   `Wrote ${OUTPUT.replace(ROOT + '/', '')} — ${primitiveNames.size} primitives, ` +
-    `${Object.keys(DIALS).length} dials.`
+    `${Object.keys(DIALS).length} dials, ` +
+    `${tokens.effects ? Object.keys(tokens.effects.tokens).length : 0} effect styles.`
 );
