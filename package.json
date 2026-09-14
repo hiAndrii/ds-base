@@ -2,14 +2,49 @@
     "name": "ds-base",
     "version": "1.0.0",
     "description": "A token-driven design system built to mass-produce UI kits and templates.",
-    "main": "index.js",
+    "type": "module",
+    "main": "./dist/index.js",
+    "module": "./dist/index.js",
+    "types": "./dist/index.d.ts",
+    "sideEffects": [
+        "**/*.css"
+    ],
+    "files": [
+        "dist"
+    ],
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        },
+        "./styles": "./dist/style.css",
+        "./tokens.css": "./dist/tokens.css"
+    },
     "directories": {
         "doc": "docs"
     },
     "scripts": {
         "export": "node scripts/assemble-tokens.mjs",
         "tokens": "node scripts/build-tokens.mjs",
+        "build": "vite build",
+        "dev": "vite build --watch",
+        "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
         "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "peerDependencies": {
+        "react": ">=18",
+        "react-dom": ">=18"
+    },
+    "devDependencies": {
+        "@types/node": "^20.14.0",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@vitejs/plugin-react": "^4.3.1",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1",
+        "typescript": "^5.5.3",
+        "vite": "^5.3.4",
+        "vite-plugin-dts": "^4.0.0"
     },
     "repository": {
         "type": "git",
@@ -18,7 +53,6 @@
     "keywords": [],
     "author": "",
     "license": "ISC",
-    "type": "commonjs",
     "bugs": {
         "url": "https://github.com/hiAndrii/ds-base/issues"
     },
