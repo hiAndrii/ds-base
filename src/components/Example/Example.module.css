@@ -1,0 +1,17 @@
+/*
+ * Example — the reference stylesheet for the folder convention.
+ *
+ * Every value here is a semantic token from src/styles/tokens.css. It reads
+ * colour (--bg-surface / --text-primary), spacing (--space-md) and radius
+ * (--radius-md) at once, so if any one of the three fails to resolve the box
+ * loses its fill, its padding or its rounded corners — the break is visible
+ * to the eye. Never hardcode a colour/space/radius/font-size, and never
+ * reference a primitive (--p-*) or brand (--b-*) variable here.
+ */
+.box {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+}
