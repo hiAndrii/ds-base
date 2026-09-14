@@ -1,44 +1,412 @@
 <!doctype html>
-<html lang="uk" data-theme="dark">
+<html lang="en" data-brand="base" data-theme="light" data-density="default" data-shape="soft" data-type="studio">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Design System Base</title>
+    <title>Design System Base — demo</title>
+
+    <link rel="stylesheet" href="src/styles/tokens.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <style>
-         :root {
-            --bg: #FAFAFA;
-            --fg: #18181B;
-            --muted: #71717A;
+        /* Every value below references a semantic token. No literals, no --p-/--b-. */
+
+        * {
+            box-sizing: border-box;
         }
-        
-        [data-theme="dark"] {
-            --bg: #09090B;
-            --fg: #FAFAFA;
-            --muted: #A1A1AA;
-        }
-        
+
         body {
             margin: 0;
-            min-height: 100vh;
-            display: grid;
-            place-content: center;
-            gap: 8px;
-            background: var(--bg);
-            color: var(--fg);
-            font: 16px/1.5 system-ui, sans-serif;
+            padding: 0;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: var(--body-md-size);
+            line-height: var(--body-md-line-height);
         }
-        
-        p {
+
+        /* --- Control panel ------------------------------------------------ */
+
+        .panel {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            align-items: flex-end;
+            padding: var(--space-md) var(--space-xl);
+            background: var(--bg-surface);
+            border-bottom: var(--border-width-thin) solid var(--border-default);
+            box-shadow: var(--elevation-sm);
+        }
+
+        .dial {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2xs);
+        }
+
+        .dial > span {
+            font-family: var(--font-body);
+            font-size: var(--overline-size);
+            line-height: var(--overline-line-height);
+            letter-spacing: var(--overline-tracking);
+            font-weight: var(--overline-weight);
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .dial select {
+            appearance: none;
+            padding: var(--space-2xs) var(--space-sm);
+            min-width: 168px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: var(--border-width-thin) solid var(--border-default);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: var(--label-md-size);
+            line-height: var(--label-md-line-height);
+            font-weight: var(--label-md-weight);
+        }
+
+        .dial select:focus-visible {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: var(--focus-ring);
+        }
+
+        /* --- Layout ------------------------------------------------------- */
+
+        main {
+            padding: var(--space-2xl) var(--space-xl) var(--space-5xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4xl);
+            max-width: 1120px;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-lg);
+        }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--heading-md-size);
+            line-height: var(--heading-md-line-height);
+            letter-spacing: var(--heading-md-tracking);
+            font-weight: var(--heading-md-weight);
             margin: 0;
-            color: var(--muted);
+        }
+
+        .section-lede {
+            margin: 0;
+            max-width: 60ch;
+            color: var(--text-secondary);
+            font-size: var(--body-sm-size);
+            line-height: var(--body-sm-line-height);
+        }
+
+        .token-name {
+            font-family: var(--font-mono);
+            font-size: var(--code-sm-size);
+            line-height: var(--code-sm-line-height);
+            color: var(--text-tertiary);
+        }
+
+        /* --- Brand specimen ----------------------------------------------- */
+
+        .swatches {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .swatch {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2xs);
+        }
+
+        .swatch .chip {
+            height: var(--size-avatar-2xl);
+            border-radius: var(--radius-md);
+            border: var(--border-width-thin) solid var(--border-default);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-sm);
+            font-family: var(--font-body);
+            font-size: var(--label-sm-size);
+            line-height: var(--label-sm-line-height);
+            font-weight: var(--label-sm-weight);
+        }
+
+        .chip.canvas    { background: var(--bg-canvas); color: var(--text-secondary); }
+        .chip.surface   { background: var(--bg-surface); color: var(--text-secondary); }
+        .chip.accent    { background: var(--bg-accent); color: var(--text-on-accent); border-color: var(--bg-accent); }
+        .chip.border    { background: var(--bg-surface); border: var(--border-width-thick) solid var(--border-default); color: var(--text-secondary); }
+        .chip.text-primary   { background: var(--bg-surface); color: var(--text-primary); font-weight: var(--label-lg-weight); }
+        .chip.text-secondary { background: var(--bg-surface); color: var(--text-secondary); font-weight: var(--label-lg-weight); }
+
+        /* --- Typography scale --------------------------------------------- */
+
+        .type-row {
+            display: grid;
+            grid-template-columns: 128px 1fr;
+            gap: var(--space-lg);
+            align-items: baseline;
+            padding-bottom: var(--space-sm);
+            border-bottom: var(--border-width-thin) solid var(--border-subtle);
+        }
+
+        .type-sample {
+            color: var(--text-primary);
+            margin: 0;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        /* --- Spacing scale ------------------------------------------------ */
+
+        .scale-row {
+            display: grid;
+            grid-template-columns: 96px 1fr;
+            gap: var(--space-md);
+            align-items: center;
+        }
+
+        .space-bar {
+            height: var(--space-md);
+            background: var(--bg-accent);
+            border-radius: var(--radius-xs);
+        }
+
+        /* --- Radius scale ------------------------------------------------- */
+
+        .radii {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: var(--space-lg);
+        }
+
+        .radius-cell {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2xs);
+        }
+
+        .radius-box {
+            height: var(--size-avatar-xl);
+            background: var(--bg-neutral);
+            border: var(--border-width-thin) solid var(--border-default);
+        }
+
+        /* --- Elevation cards ---------------------------------------------- */
+
+        .elevation {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: var(--space-xl);
+            padding: var(--space-sm) 0;
+        }
+
+        .elevation-card {
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2xs);
+            min-height: var(--size-avatar-2xl);
+        }
+
+        .elevation-card.sm { box-shadow: var(--elevation-sm); }
+        .elevation-card.md { box-shadow: var(--elevation-md); }
+        .elevation-card.lg { box-shadow: var(--elevation-lg); }
+        .elevation-card.xl { box-shadow: var(--elevation-xl); }
+
+        .elevation-card strong {
+            font-family: var(--font-display);
+            font-size: var(--heading-xs-size);
+            line-height: var(--heading-xs-line-height);
+            font-weight: var(--heading-xs-weight);
         }
     </style>
 </head>
 
 <body>
-    <h1>Design System Base</h1>
-    <p>Token-driven. Five dials. Documentation coming.</p>
+    <div class="panel">
+        <label class="dial">
+            <span>Brand</span>
+            <select data-dial="brand">
+                <option value="base" selected>Base</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="ai">AI</option>
+                <option value="banking">Banking</option>
+                <option value="e-commerce">E-commerce</option>
+                <option value="crypto">Crypto</option>
+                <option value="education">Education</option>
+                <option value="wellness">Wellness</option>
+            </select>
+        </label>
+
+        <label class="dial">
+            <span>Theme</span>
+            <select data-dial="theme">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </label>
+
+        <label class="dial">
+            <span>Density</span>
+            <select data-dial="density">
+                <option value="default" selected>Default</option>
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+            </select>
+        </label>
+
+        <label class="dial">
+            <span>Shape</span>
+            <select data-dial="shape">
+                <option value="soft" selected>Soft</option>
+                <option value="crisp">Crisp</option>
+                <option value="sharp">Sharp</option>
+                <option value="rounded">Rounded</option>
+            </select>
+        </label>
+
+        <label class="dial">
+            <span>Typography</span>
+            <select data-dial="type">
+                <option value="studio" selected>Studio</option>
+                <option value="editorial">Editorial</option>
+                <option value="technical">Technical</option>
+                <option value="expressive">Expressive</option>
+            </select>
+        </label>
+    </div>
+
+    <main>
+        <section>
+            <h2 class="section-title">Brand specimen</h2>
+            <p class="section-lede">Six semantic tokens. Change Brand or Theme and every rectangle re-tints — no rule in the code.</p>
+            <div class="swatches">
+                <div class="swatch">
+                    <div class="chip canvas">Aa</div>
+                    <span class="token-name">bg/canvas</span>
+                </div>
+                <div class="swatch">
+                    <div class="chip surface">Aa</div>
+                    <span class="token-name">bg/surface</span>
+                </div>
+                <div class="swatch">
+                    <div class="chip accent">Aa</div>
+                    <span class="token-name">bg/accent</span>
+                </div>
+                <div class="swatch">
+                    <div class="chip border">Aa</div>
+                    <span class="token-name">border/default</span>
+                </div>
+                <div class="swatch">
+                    <div class="chip text-primary">Aa</div>
+                    <span class="token-name">text/primary</span>
+                </div>
+                <div class="swatch">
+                    <div class="chip text-secondary">Aa</div>
+                    <span class="token-name">text/secondary</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Typography scale</h2>
+            <p class="section-lede">Nineteen roles. Change Typography and the typeface, weight, tracking and leading shift — the size stays constant.</p>
+
+            <div class="type-row"><span class="token-name">display-2xl</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--display-2xl-size); line-height: var(--display-2xl-line-height); letter-spacing: var(--display-2xl-tracking); font-weight: var(--display-2xl-weight);">Design System</p></div>
+            <div class="type-row"><span class="token-name">display-xl</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--display-xl-size); line-height: var(--display-xl-line-height); letter-spacing: var(--display-xl-tracking); font-weight: var(--display-xl-weight);">Design System</p></div>
+            <div class="type-row"><span class="token-name">display-lg</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--display-lg-size); line-height: var(--display-lg-line-height); letter-spacing: var(--display-lg-tracking); font-weight: var(--display-lg-weight);">Design System</p></div>
+            <div class="type-row"><span class="token-name">heading-xl</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--heading-xl-size); line-height: var(--heading-xl-line-height); letter-spacing: var(--heading-xl-tracking); font-weight: var(--heading-xl-weight);">The quick brown fox</p></div>
+            <div class="type-row"><span class="token-name">heading-lg</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--heading-lg-size); line-height: var(--heading-lg-line-height); letter-spacing: var(--heading-lg-tracking); font-weight: var(--heading-lg-weight);">The quick brown fox</p></div>
+            <div class="type-row"><span class="token-name">heading-md</span><p class="type-sample" style="font-family: var(--font-display); font-size: var(--heading-md-size); line-height: var(--heading-md-line-height); letter-spacing: var(--heading-md-tracking); font-weight: var(--heading-md-weight);">The quick brown fox</p></div>
+            <div class="type-row"><span class="token-name">heading-sm</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--heading-sm-size); line-height: var(--heading-sm-line-height); letter-spacing: var(--heading-sm-tracking); font-weight: var(--heading-sm-weight);">The quick brown fox jumps</p></div>
+            <div class="type-row"><span class="token-name">heading-xs</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--heading-xs-size); line-height: var(--heading-xs-line-height); letter-spacing: var(--heading-xs-tracking); font-weight: var(--heading-xs-weight);">The quick brown fox jumps</p></div>
+            <div class="type-row"><span class="token-name">body-lg</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--body-lg-size); line-height: var(--body-lg-line-height); letter-spacing: var(--body-lg-tracking); font-weight: var(--body-lg-weight);">The quick brown fox jumps over the lazy dog</p></div>
+            <div class="type-row"><span class="token-name">body-md</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--body-md-size); line-height: var(--body-md-line-height); letter-spacing: var(--body-md-tracking); font-weight: var(--body-md-weight);">The quick brown fox jumps over the lazy dog</p></div>
+            <div class="type-row"><span class="token-name">body-sm</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--body-sm-size); line-height: var(--body-sm-line-height); letter-spacing: var(--body-sm-tracking); font-weight: var(--body-sm-weight);">The quick brown fox jumps over the lazy dog</p></div>
+            <div class="type-row"><span class="token-name">body-xs</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--body-xs-size); line-height: var(--body-xs-line-height); letter-spacing: var(--body-xs-tracking); font-weight: var(--body-xs-weight);">The quick brown fox jumps over the lazy dog</p></div>
+            <div class="type-row"><span class="token-name">label-lg</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--label-lg-size); line-height: var(--label-lg-line-height); letter-spacing: var(--label-lg-tracking); font-weight: var(--label-lg-weight);">Save changes</p></div>
+            <div class="type-row"><span class="token-name">label-md</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--label-md-size); line-height: var(--label-md-line-height); letter-spacing: var(--label-md-tracking); font-weight: var(--label-md-weight);">Save changes</p></div>
+            <div class="type-row"><span class="token-name">label-sm</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--label-sm-size); line-height: var(--label-sm-line-height); letter-spacing: var(--label-sm-tracking); font-weight: var(--label-sm-weight);">Save changes</p></div>
+            <div class="type-row"><span class="token-name">label-xs</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--label-xs-size); line-height: var(--label-xs-line-height); letter-spacing: var(--label-xs-tracking); font-weight: var(--label-xs-weight);">Save changes</p></div>
+            <div class="type-row"><span class="token-name">code-md</span><p class="type-sample" style="font-family: var(--font-mono); font-size: var(--code-md-size); line-height: var(--code-md-line-height); letter-spacing: var(--code-md-tracking); font-weight: var(--code-md-weight);">const token = "value";</p></div>
+            <div class="type-row"><span class="token-name">code-sm</span><p class="type-sample" style="font-family: var(--font-mono); font-size: var(--code-sm-size); line-height: var(--code-sm-line-height); letter-spacing: var(--code-sm-tracking); font-weight: var(--code-sm-weight);">const token = "value";</p></div>
+            <div class="type-row"><span class="token-name">overline</span><p class="type-sample" style="font-family: var(--font-body); font-size: var(--overline-size); line-height: var(--overline-line-height); letter-spacing: var(--overline-tracking); font-weight: var(--overline-weight); text-transform: uppercase;">Section overline</p></div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Spacing scale</h2>
+            <p class="section-lede">Each bar is as wide as its spacing token. Change Density and the whole scale rescales.</p>
+            <div class="scale-row"><span class="token-name">space/2xs</span><div class="space-bar" style="width: var(--space-2xs);"></div></div>
+            <div class="scale-row"><span class="token-name">space/xs</span><div class="space-bar" style="width: var(--space-xs);"></div></div>
+            <div class="scale-row"><span class="token-name">space/sm</span><div class="space-bar" style="width: var(--space-sm);"></div></div>
+            <div class="scale-row"><span class="token-name">space/md</span><div class="space-bar" style="width: var(--space-md);"></div></div>
+            <div class="scale-row"><span class="token-name">space/lg</span><div class="space-bar" style="width: var(--space-lg);"></div></div>
+            <div class="scale-row"><span class="token-name">space/xl</span><div class="space-bar" style="width: var(--space-xl);"></div></div>
+            <div class="scale-row"><span class="token-name">space/2xl</span><div class="space-bar" style="width: var(--space-2xl);"></div></div>
+            <div class="scale-row"><span class="token-name">space/3xl</span><div class="space-bar" style="width: var(--space-3xl);"></div></div>
+            <div class="scale-row"><span class="token-name">space/4xl</span><div class="space-bar" style="width: var(--space-4xl);"></div></div>
+            <div class="scale-row"><span class="token-name">space/5xl</span><div class="space-bar" style="width: var(--space-5xl);"></div></div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Radius scale</h2>
+            <p class="section-lede">Each square is rounded by its radius token. Change Shape and every corner rebuilds together.</p>
+            <div class="radii">
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-none);"></div><span class="token-name">radius/none</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-xs);"></div><span class="token-name">radius/xs</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-sm);"></div><span class="token-name">radius/sm</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-md);"></div><span class="token-name">radius/md</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-lg);"></div><span class="token-name">radius/lg</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-xl);"></div><span class="token-name">radius/xl</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-2xl);"></div><span class="token-name">radius/2xl</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-3xl);"></div><span class="token-name">radius/3xl</span></div>
+                <div class="radius-cell"><div class="radius-box" style="border-radius: var(--radius-full);"></div><span class="token-name">radius/full</span></div>
+            </div>
+        </section>
+
+        <section>
+            <h2 class="section-title">Elevation</h2>
+            <p class="section-lede">Shadow geometry is fixed; the colour follows Theme. Switch to Dark and the shadows deepen — a shadow tuned for white disappears on near-black.</p>
+            <div class="elevation">
+                <div class="elevation-card sm"><strong>Elevation SM</strong><span class="token-name">--elevation-sm</span></div>
+                <div class="elevation-card md"><strong>Elevation MD</strong><span class="token-name">--elevation-md</span></div>
+                <div class="elevation-card lg"><strong>Elevation LG</strong><span class="token-name">--elevation-lg</span></div>
+                <div class="elevation-card xl"><strong>Elevation XL</strong><span class="token-name">--elevation-xl</span></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // One generic handler. data-dial holds the CSS attribute suffix
+        // (Typography → "type", matching [data-type] in tokens.css).
+        for (const select of document.querySelectorAll('.dial select')) {
+            select.addEventListener('change', function () {
+                document.documentElement.setAttribute('data-' + this.dataset.dial, this.value);
+            });
+        }
+    </script>
 </body>
 
 </html>
