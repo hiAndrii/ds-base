@@ -1,26 +1,26 @@
 {
-  "name": "ds-base",
-  "version": "1.0.0",
-  "description": "A token-driven design system built to mass-produce UI kits and templates.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
-  "scripts": {
-    "export": "node scripts/assemble-tokens.mjs",
-    "tokens": "node scripts/build-tokens.mjs",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/hiAndrii/ds-base.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/hiAndrii/ds-base/issues"
-  },
-  "homepage": "https://github.com/hiAndrii/ds-base#readme"
+    "name": "ds-base",
+    "version": "1.0.0",
+    "description": "A token-driven design system built to mass-produce UI kits and templates.",
+    "main": "index.js",
+    "directories": {
+        "doc": "docs"
+    },
+    "scripts": {
+        "export": "node scripts/assemble-tokens.mjs",
+        "tokens": "node scripts/build-tokens.mjs",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/hiAndrii/ds-base.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "commonjs",
+    "bugs": {
+        "url": "https://github.com/hiAndrii/ds-base/issues"
+    },
+    "homepage": "https://github.com/hiAndrii/ds-base#readme"
 }

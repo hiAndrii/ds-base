@@ -66,7 +66,7 @@ that no semantic token provides, the fix is a new token — not a hardcoded valu
 | [docs/ATOMS.md](docs/ATOMS.md) | Every atom's API — properties, states, composition rules, anti-patterns |
 | [docs/LABEL-RULE.md](docs/LABEL-RULE.md) | Where the Label component is used, where it is deliberately not, and at what stage |
 | [docs/LLM-GUIDE.md](docs/LLM-GUIDE.md) | Rules an AI agent must follow when composing UI from this system |
-| [docs/tokens.json](docs/tokens.json) | The token graph, machine-readable |
+| [tokens/tokens.json](tokens/tokens.json) | The token graph, machine-readable |
 
 Inside the Figma file: **Start Here** explains the architecture, **Theme Lab** proves
 it works.
