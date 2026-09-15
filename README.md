@@ -83,7 +83,7 @@ it works.
   [ux-components taxonomy](https://www.ux-components.com/components/atomic):
   Avatar, Badge, Button, Checkbox, Chip, Color Picker, Icon, Image, Input, Label,
   Number Input, Progress, Radio, Rating, Separator, Skeleton, Slider, Spinner,
-  Switch, Textarea, Toggle — **304 variants, zero hardcoded values**
+  Switch, Textarea, Toggle — **319 variants, zero hardcoded values**
 - **3 molecules**: Checkbox Field, Radio Field, Switch Field — 52 variants
 - **Theme Lab**: two specimen components across five dial sweeps, 42 cards
 

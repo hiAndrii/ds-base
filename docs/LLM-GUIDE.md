@@ -32,7 +32,20 @@ literally. They are ordered by how often violating them causes damage.
     A selection control ships bare and is paired through a `… Field` molecule that
     nests an exposed Label instance. Never nest Label inside a field control — the
     exposed nested `Size`/`State` desyncs from the parent. See docs/LABEL-RULE.md.
-11. Every new component must be added to a Theme Lab specimen and checked against
+11. **Per-variant component-property defaults do not survive `combineAsVariants`.**
+    They collapse to the first variant's value. Anything a state must show on its
+    own — a spinner, an error message — is a NODE whose `visible` you set
+    directly, with no property reference. Switching a variant on an existing
+    instance also keeps the user's overrides, so a property-driven state is
+    invisible twice over.
+12. **`clone()` on a variant drops every `componentPropertyReferences`.** After
+    cloning a variant to build a new state, re-wire the references by hand or the
+    new variant silently ignores Label, icon and visibility properties.
+13. **A spread-only drop shadow (radius 0) does not paint on a COMPONENT node.**
+    It paints fine on a FRAME. Put focus rings on an inner frame, or draw them as
+    a stroked node. Verify with a screenshot — the data reads back correct either
+    way.
+14. Every new component must be added to a Theme Lab specimen and checked against
     Shape `Sharp` + `Rounded`, Theme `Dark`, Density `Compact` and Typography
     `Editorial` before it is called done.
 
@@ -293,6 +306,7 @@ DESIGN-SYSTEM §6 for the recommended combinations.
 - [ ] Sizing modes were set AFTER `resize()` — hug components actually hug
 - [ ] Icon + label pairs carry the `space/optical` wrapper on the label
 - [ ] No `createAutoLayout` frame left with its default white fill
+- [ ] Every state is visibly distinct — check the variant grid, not the data
 - [ ] Added to a Theme Lab specimen
 - [ ] Labelled control? Field controls own their label; selection controls get a `… Field` molecule
 - [ ] Renders correctly in Shape `Sharp` + `Rounded`, Theme `Dark`, Density `Compact`, Typography `Editorial`

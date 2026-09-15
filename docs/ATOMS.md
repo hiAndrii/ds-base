@@ -37,7 +37,7 @@ will read as a foreign object next to the rest.
 
 ---
 
-## Button — 75 variants
+## Button — 90 variants
 
 The primary mechanism for user-initiated actions.
 
@@ -45,7 +45,7 @@ The primary mechanism for user-initiated actions.
 |---|---|
 | `Variant` | Primary · Secondary · Outline · Ghost · Destructive |
 | `Size` | SM (32) · MD (40) · LG (48) |
-| `State` | Default · Hover · Active · Disabled · Loading |
+| `State` | Default · Hover · Focus · Active · Disabled · Loading |
 
 **Properties:** `Label` (text) · `Show icon left` (bool) · `Icon left` (swap) ·
 `Show icon right` (bool) · `Icon right` (swap)
@@ -54,11 +54,27 @@ The primary mechanism for user-initiated actions.
 
 ```
 Button  (hug width, fixed height)
+  Spinner      visible only in Loading — structural, not a property
   Icon left    optional, size/icon/*
   Label        2px optical wrapper
     Text       the TEXT property target
   Icon right   optional, size/icon/*
+  Focus ring   absolute, visible only in Focus
 ```
+
+**Loading** — the spinner belongs to the variant, not to `Show icon left`.
+Component-property defaults do not survive `combineAsVariants`, and switching a
+variant on an existing instance keeps the user's overrides; either one on its own
+would leave Loading rendering exactly like Default. In Loading the left icon slot
+is disconnected from its properties so `Show icon left` cannot place a second
+glyph beside the spinner.
+
+**Focus** — a stroked ring node sitting 4px outside the control, one radius step
+larger, in `border/focus` (`border/danger` on Destructive). It is a node rather
+than the `Focus/Ring` effect style because a spread-only drop shadow does not
+paint on a COMPONENT node; the field atoms can use the style because theirs sits
+on an inner `Field` frame. The ring uses STRETCH constraints, so it tracks the
+button as the label changes its width.
 
 The label sits in its own 2px auto-layout wrapper. That single wrapper pushes the
 text off the button's outer edge by the amount an icon box already carries as

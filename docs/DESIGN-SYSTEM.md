@@ -451,8 +451,8 @@ display and heading roles, **weight** on display roles, and the **families**.
 | `Elevation/LG` | 0 12 16 −4 + 0 4 6 −2 | Popovers, menus, tooltips |
 | `Elevation/XL` | 0 20 24 −4 + 0 8 8 −4 | Dialogs, sheets |
 | `Elevation/2XL` | 0 32 64 −12 | Full-screen modals |
-| `Focus/Ring` | 0 0 0 +3 spread | Keyboard focus halo |
-| `Focus/Ring Danger` | 0 0 0 +3 spread | Focus on a destructive control |
+| `Focus/Ring` | 0 0 0 +4 ring, 0 0 0 +2 surface gap | Keyboard focus halo |
+| `Focus/Ring Danger` | same, in `border/danger` | Focus on a destructive control |
 | `Inset/Sunken` | inner 0 1 2 | Pressed wells, code blocks |
 
 ---
@@ -611,3 +611,21 @@ the eye catches a break in a sweep far faster than in an isolated card.
   is a missed binding.
 - **Editorial** — the card grows taller and nothing overlaps. Leading changes, sizes
   do not.
+
+---
+
+## 10. Effect layer order
+
+Figma paints **later** effects on top of earlier ones. CSS paints **earlier**
+`box-shadow` layers on top. `scripts/build-tokens.mjs` reverses the array when it
+emits, so the two renderings match.
+
+It matters wherever layers overlap. A focus ring is built as a wide coloured ring
+plus a narrower surface-coloured gap that covers the ring's inner half; get the
+order wrong and the ring simply covers the gap, leaving a solid band welded to the
+control instead of a ring floating outside it.
+
+One consequence worth knowing: a spread-only drop shadow does not paint on a
+COMPONENT node, only on a FRAME. Button therefore draws its focus ring as a
+stroked node; Input, Textarea, Number Input and Color Picker put the effect style
+on their inner `Field` frame, where it renders normally.
