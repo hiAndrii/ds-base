@@ -45,7 +45,12 @@ literally. They are ordered by how often violating them causes damage.
     It paints fine on a FRAME. Put focus rings on an inner frame, or draw them as
     a stroked node. Verify with a screenshot — the data reads back correct either
     way.
-14. Every new component must be added to a Theme Lab specimen and checked against
+14. **A blocking state renders on the disabled palette.** `Loading`, and any other
+    state that suspends interaction, uses `bg/disabled` / `text/disabled` /
+    `icon/disabled` plus a motion affordance — never the live palette. A control
+    that still looks pressable while it is not is the bug this rule exists to
+    prevent. Semantics stay separate: `aria-busy`, not a permanent `disabled`.
+15. Every new component must be added to a Theme Lab specimen and checked against
     Shape `Sharp` + `Rounded`, Theme `Dark`, Density `Compact` and Typography
     `Editorial` before it is called done.
 

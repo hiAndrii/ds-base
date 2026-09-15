@@ -62,12 +62,23 @@ Button  (hug width, fixed height)
   Focus ring   absolute, visible only in Focus
 ```
 
-**Loading** — the spinner belongs to the variant, not to `Show icon left`.
+**Loading** — renders on the disabled palette: `bg/disabled` fill,
+`text/disabled` label, `icon/disabled` spinner, in every one of the five variants.
+A loading button cannot be pressed, so it must not keep advertising that it can;
+dropping the accent fill removes the "is this still live?" question instead of
+answering it with motion alone. The spinner is what separates *busy* from *not
+available* — it is the only difference between this state and Disabled.
+
+The spinner belongs to the variant, not to `Show icon left`.
 Component-property defaults do not survive `combineAsVariants`, and switching a
 variant on an existing instance keeps the user's overrides; either one on its own
 would leave Loading rendering exactly like Default. In Loading the left icon slot
 is disconnected from its properties so `Show icon left` cannot place a second
 glyph beside the spinner.
+
+In code the control carries `aria-busy="true"` and `disabled` — it is temporarily
+inactive, not permanently unavailable, so the label text must stay readable rather
+than being replaced by the spinner.
 
 **Focus** — a stroked ring node sitting 4px outside the control, one radius step
 larger, in `border/focus` (`border/danger` on Destructive). It is a node rather
@@ -106,7 +117,8 @@ and the icon's own ~2px inset are counted. Do not "fix" it to 8.
 - Use a Button for navigation. That is a Link.
 - Put two Primary buttons in the same decision group.
 - Set an explicit width. The button hugs its label.
-- Ship Loading without also disabling the underlying action.
+- Ship Loading without also disabling the underlying action. The state is drawn
+  as non-interactive; the handler must agree with it.
 - Add padding to the icon to "balance" it. The correction belongs on the label.
 
 ## Input — 18 variants

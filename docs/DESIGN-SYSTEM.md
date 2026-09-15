@@ -278,7 +278,7 @@ Typefaces and corner radii used to live here. They now have their own dials — 
 | `bg/surface-active` | neutral/100 | neutral/700 | Pressed surfaces |
 | `bg/inverse` | neutral/900 | neutral/50 | Tooltips, inverted chips |
 | `bg/overlay` | alpha-black/48 | alpha-black/64 | Modal scrim |
-| `bg/disabled` | neutral/100 | neutral/800 | Disabled control fill |
+| `bg/disabled` | neutral/100 | neutral/800 | Disabled **and loading** control fill |
 | `bg/skeleton` | neutral/100 | neutral/800 | Loading placeholders |
 | `bg/track` | neutral/200 | neutral/700 | Slider, switch and progress tracks |
 | `bg/hover-overlay` | alpha-black/4 | alpha-white/8 | Wash over transparent controls |
@@ -314,7 +314,7 @@ white label in both, and lightening them in Dark would drop below 4.5:1.
 | `text/secondary` | neutral/600 | neutral/400 | Supporting copy, captions |
 | `text/tertiary` | neutral/500 | neutral/500 | Metadata, timestamps |
 | `text/placeholder` | neutral/400 | neutral/600 | Empty field hints |
-| `text/disabled` | neutral/400 | neutral/600 | Disabled labels |
+| `text/disabled` | neutral/400 | neutral/600 | Disabled and loading labels |
 | `text/on-accent` | accent/contrast | accent/contrast | On a solid accent fill |
 | `text/on-solid` | gray/0 | gray/0 | On danger / info solids |
 | `text/on-success` | gray/950 | gray/950 | On an emerald solid |
@@ -537,6 +537,11 @@ able to leave one.
   the fill moves one ramp step deeper — the label never darkens.
 - Disabled controls are exempt from contrast requirements but are still drawn to be
   recognisable as controls — `text/disabled` sits at neutral/400, not neutral/300.
+- **Busy controls borrow the disabled palette but not the disabled semantics.** A
+  loading control renders on `bg/disabled` / `text/disabled` so it reads as
+  untouchable, and announces itself with `aria-busy="true"`. The spinner is the
+  only thing separating *busy* from *unavailable*, so it is never the sole carrier
+  of that meaning in code — the accessible name says what is in flight.
 
 ---
 
