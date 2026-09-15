@@ -113,7 +113,12 @@ function primitiveDeclarations() {
 // switching data-theme re-resolves the shadow without a rebuild. That is the
 // whole reason the colour is stored as an alias rather than a literal.
 function shadowValue(name, layers) {
-  return layers
+  // Figma paints LATER effects on top of earlier ones; CSS paints EARLIER
+  // box-shadows on top. Reversing here keeps the two renderings identical —
+  // without it a focus ring would cover the gap that separates it from the
+  // control instead of sitting outside it.
+  return [...layers]
+    .reverse()
     .map((l) => {
       const inset = l.type === 'inset' ? 'inset ' : '';
       return `${inset}${l.x}px ${l.y}px ${l.blur}px ${l.spread}px ${formatValue(name, l.color)}`;

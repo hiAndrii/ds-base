@@ -368,7 +368,7 @@
   --effect-shadow-md: var(--p-alpha-black-12);
   --effect-shadow-lg: var(--p-alpha-black-16);
   --effect-shadow-xl: var(--p-alpha-black-24);
-  --effect-focus-ring: var(--b-accent-200);
+  --effect-focus-ring: var(--b-accent-500);
   /* space: Default (default) */
   --space-0: 0px;
   --space-2xs: 4px;
@@ -510,13 +510,13 @@
   --overline-weight: 600;
   /* effects: geometry fixed, colour follows the theme */
   --elevation-xs: 0px 1px 2px 0px var(--effect-shadow-sm);
-  --elevation-sm: 0px 1px 2px 0px var(--effect-shadow-sm), 0px 2px 4px -1px var(--effect-shadow-sm);
-  --elevation-md: 0px 4px 8px -2px var(--effect-shadow-md), 0px 2px 4px -2px var(--effect-shadow-sm);
-  --elevation-lg: 0px 12px 16px -4px var(--effect-shadow-md), 0px 4px 6px -2px var(--effect-shadow-sm);
-  --elevation-xl: 0px 20px 24px -4px var(--effect-shadow-lg), 0px 8px 8px -4px var(--effect-shadow-md);
+  --elevation-sm: 0px 2px 4px -1px var(--effect-shadow-sm), 0px 1px 2px 0px var(--effect-shadow-sm);
+  --elevation-md: 0px 2px 4px -2px var(--effect-shadow-sm), 0px 4px 8px -2px var(--effect-shadow-md);
+  --elevation-lg: 0px 4px 6px -2px var(--effect-shadow-sm), 0px 12px 16px -4px var(--effect-shadow-md);
+  --elevation-xl: 0px 8px 8px -4px var(--effect-shadow-md), 0px 20px 24px -4px var(--effect-shadow-lg);
   --elevation-2xl: 0px 32px 64px -12px var(--effect-shadow-xl);
-  --focus-ring: 0px 0px 0px 3px var(--effect-focus-ring);
-  --focus-ring-danger: 0px 0px 0px 3px var(--bg-danger-subtle);
+  --focus-ring: 0px 0px 0px 2px var(--bg-surface), 0px 0px 0px 4px var(--effect-focus-ring);
+  --focus-ring-danger: 0px 0px 0px 2px var(--bg-surface), 0px 0px 0px 4px var(--border-danger);
   --inset-sunken: inset 0px 1px 2px 0px var(--effect-shadow-sm);
 }
 
@@ -845,7 +845,7 @@
   --effect-shadow-md: var(--p-alpha-black-12);
   --effect-shadow-lg: var(--p-alpha-black-16);
   --effect-shadow-xl: var(--p-alpha-black-24);
-  --effect-focus-ring: var(--b-accent-200);
+  --effect-focus-ring: var(--b-accent-500);
 }
 
 [data-theme="dark"] {
@@ -925,7 +925,7 @@
   --effect-shadow-md: var(--p-alpha-black-64);
   --effect-shadow-lg: var(--p-alpha-black-64);
   --effect-shadow-xl: var(--p-alpha-black-80);
-  --effect-focus-ring: var(--b-accent-800);
+  --effect-focus-ring: var(--b-accent-400);
 }
 
 [data-density="default"] {

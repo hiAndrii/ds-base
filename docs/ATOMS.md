@@ -37,7 +37,7 @@ will read as a foreign object next to the rest.
 
 ---
 
-## Button — 75 variants
+## Button — 90 variants
 
 The primary mechanism for user-initiated actions.
 
@@ -45,7 +45,7 @@ The primary mechanism for user-initiated actions.
 |---|---|
 | `Variant` | Primary · Secondary · Outline · Ghost · Destructive |
 | `Size` | SM (32) · MD (40) · LG (48) |
-| `State` | Default · Hover · Active · Disabled · Loading |
+| `State` | Default · Hover · Focus · Active · Disabled · Loading |
 
 **Properties:** `Label` (text) · `Show icon left` (bool) · `Icon left` (swap) ·
 `Show icon right` (bool) · `Icon right` (swap)
@@ -54,11 +54,38 @@ The primary mechanism for user-initiated actions.
 
 ```
 Button  (hug width, fixed height)
+  Spinner      visible only in Loading — structural, not a property
   Icon left    optional, size/icon/*
   Label        2px optical wrapper
     Text       the TEXT property target
   Icon right   optional, size/icon/*
+  Focus ring   absolute, visible only in Focus
 ```
+
+**Loading** — renders on the disabled palette: `bg/disabled` fill,
+`text/disabled` label, `icon/disabled` spinner, in every one of the five variants.
+A loading button cannot be pressed, so it must not keep advertising that it can;
+dropping the accent fill removes the "is this still live?" question instead of
+answering it with motion alone. The spinner is what separates *busy* from *not
+available* — it is the only difference between this state and Disabled.
+
+The spinner belongs to the variant, not to `Show icon left`.
+Component-property defaults do not survive `combineAsVariants`, and switching a
+variant on an existing instance keeps the user's overrides; either one on its own
+would leave Loading rendering exactly like Default. In Loading the left icon slot
+is disconnected from its properties so `Show icon left` cannot place a second
+glyph beside the spinner.
+
+In code the control carries `aria-busy="true"` and `disabled` — it is temporarily
+inactive, not permanently unavailable, so the label text must stay readable rather
+than being replaced by the spinner.
+
+**Focus** — a stroked ring node sitting 4px outside the control, one radius step
+larger, in `border/focus` (`border/danger` on Destructive). It is a node rather
+than the `Focus/Ring` effect style because a spread-only drop shadow does not
+paint on a COMPONENT node; the field atoms can use the style because theirs sits
+on an inner `Field` frame. The ring uses STRETCH constraints, so it tracks the
+button as the label changes its width.
 
 The label sits in its own 2px auto-layout wrapper. That single wrapper pushes the
 text off the button's outer edge by the amount an icon box already carries as
@@ -90,7 +117,8 @@ and the icon's own ~2px inset are counted. Do not "fix" it to 8.
 - Use a Button for navigation. That is a Link.
 - Put two Primary buttons in the same decision group.
 - Set an explicit width. The button hugs its label.
-- Ship Loading without also disabling the underlying action.
+- Ship Loading without also disabling the underlying action. The state is drawn
+  as non-interactive; the handler must agree with it.
 - Add padding to the icon to "balance" it. The correction belongs on the label.
 
 ## Input — 18 variants

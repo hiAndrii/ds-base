@@ -278,7 +278,7 @@ Typefaces and corner radii used to live here. They now have their own dials — 
 | `bg/surface-active` | neutral/100 | neutral/700 | Pressed surfaces |
 | `bg/inverse` | neutral/900 | neutral/50 | Tooltips, inverted chips |
 | `bg/overlay` | alpha-black/48 | alpha-black/64 | Modal scrim |
-| `bg/disabled` | neutral/100 | neutral/800 | Disabled control fill |
+| `bg/disabled` | neutral/100 | neutral/800 | Disabled **and loading** control fill |
 | `bg/skeleton` | neutral/100 | neutral/800 | Loading placeholders |
 | `bg/track` | neutral/200 | neutral/700 | Slider, switch and progress tracks |
 | `bg/hover-overlay` | alpha-black/4 | alpha-white/8 | Wash over transparent controls |
@@ -314,7 +314,7 @@ white label in both, and lightening them in Dark would drop below 4.5:1.
 | `text/secondary` | neutral/600 | neutral/400 | Supporting copy, captions |
 | `text/tertiary` | neutral/500 | neutral/500 | Metadata, timestamps |
 | `text/placeholder` | neutral/400 | neutral/600 | Empty field hints |
-| `text/disabled` | neutral/400 | neutral/600 | Disabled labels |
+| `text/disabled` | neutral/400 | neutral/600 | Disabled and loading labels |
 | `text/on-accent` | accent/contrast | accent/contrast | On a solid accent fill |
 | `text/on-solid` | gray/0 | gray/0 | On danger / info solids |
 | `text/on-success` | gray/950 | gray/950 | On an emerald solid |
@@ -451,8 +451,8 @@ display and heading roles, **weight** on display roles, and the **families**.
 | `Elevation/LG` | 0 12 16 −4 + 0 4 6 −2 | Popovers, menus, tooltips |
 | `Elevation/XL` | 0 20 24 −4 + 0 8 8 −4 | Dialogs, sheets |
 | `Elevation/2XL` | 0 32 64 −12 | Full-screen modals |
-| `Focus/Ring` | 0 0 0 +3 spread | Keyboard focus halo |
-| `Focus/Ring Danger` | 0 0 0 +3 spread | Focus on a destructive control |
+| `Focus/Ring` | 0 0 0 +4 ring, 0 0 0 +2 surface gap | Keyboard focus halo |
+| `Focus/Ring Danger` | same, in `border/danger` | Focus on a destructive control |
 | `Inset/Sunken` | inner 0 1 2 | Pressed wells, code blocks |
 
 ---
@@ -537,6 +537,11 @@ able to leave one.
   the fill moves one ramp step deeper — the label never darkens.
 - Disabled controls are exempt from contrast requirements but are still drawn to be
   recognisable as controls — `text/disabled` sits at neutral/400, not neutral/300.
+- **Busy controls borrow the disabled palette but not the disabled semantics.** A
+  loading control renders on `bg/disabled` / `text/disabled` so it reads as
+  untouchable, and announces itself with `aria-busy="true"`. The spinner is the
+  only thing separating *busy* from *unavailable*, so it is never the sole carrier
+  of that meaning in code — the accessible name says what is in flight.
 
 ---
 
@@ -611,3 +616,21 @@ the eye catches a break in a sweep far faster than in an isolated card.
   is a missed binding.
 - **Editorial** — the card grows taller and nothing overlaps. Leading changes, sizes
   do not.
+
+---
+
+## 10. Effect layer order
+
+Figma paints **later** effects on top of earlier ones. CSS paints **earlier**
+`box-shadow` layers on top. `scripts/build-tokens.mjs` reverses the array when it
+emits, so the two renderings match.
+
+It matters wherever layers overlap. A focus ring is built as a wide coloured ring
+plus a narrower surface-coloured gap that covers the ring's inner half; get the
+order wrong and the ring simply covers the gap, leaving a solid band welded to the
+control instead of a ring floating outside it.
+
+One consequence worth knowing: a spread-only drop shadow does not paint on a
+COMPONENT node, only on a FRAME. Button therefore draws its focus ring as a
+stroked node; Input, Textarea, Number Input and Color Picker put the effect style
+on their inner `Field` frame, where it renders normally.
