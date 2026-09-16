@@ -88,9 +88,10 @@ own radius and tracks its width with no constraints to maintain.
 
 Two things make it render, and both are non-obvious. The `State=Focus` variants
 set `clipsContent = true` — a spread-only shadow is not painted without it. And
-Ghost takes a `bg/surface-hover` fill in Focus, because a shadow is cast by a
-fill and a transparent button casts none; it is the same fill Ghost already uses
-on hover, so focus reads as hover plus a ring. See DESIGN-SYSTEM §10.
+Outline and Ghost — the two variants with no solid fill of their own — take a
+`bg/surface` fill in Focus, because a shadow is cast by a fill and a transparent
+button casts none. The colour matches `bg/canvas` in Light, so the fill is
+invisible on the page; it exists only so the ring is drawn. See DESIGN-SYSTEM §10.
 
 The label sits in its own 2px auto-layout wrapper. That single wrapper pushes the
 text off the button's outer edge by the amount an icon box already carries as
@@ -107,6 +108,61 @@ never touched, so the correction survives an icon swap. See DESIGN-SYSTEM §1.6.
 
 The box gap is 4px at every size. Optically it reads as ~8px once the wrapper's 2px
 and the icon's own ~2px inset are counted. Do not "fix" it to 8.
+
+**State palette**
+
+Colour is a function of `Variant` × `State`; `Size` never changes it. The table is
+read from the component's real variable bindings. `—` means no bound paint — the
+node is transparent, or carries no stroke.
+
+| Variant | State | Fill | Text | Stroke |
+|---|---|---|---|---|
+| Primary | Default | `bg/accent` | `text/on-accent` | — |
+| Primary | Hover | `bg/accent-hover` | `text/on-accent` | — |
+| Primary | Active | `bg/accent-active` | `text/on-accent` | — |
+| Primary | Focus | `bg/accent` | `text/on-accent` | — |
+| Primary | Disabled | `bg/disabled` | `text/disabled` | — |
+| Primary | Loading | `bg/disabled` | `text/disabled` | — |
+| Secondary | Default | `bg/neutral` | `text/primary` | — |
+| Secondary | Hover | `bg/neutral-hover` | `text/primary` | — |
+| Secondary | Active | `bg/neutral-active` | `text/primary` | — |
+| Secondary | Focus | `bg/neutral` | `text/primary` | — |
+| Secondary | Disabled | `bg/disabled` | `text/disabled` | — |
+| Secondary | Loading | `bg/disabled` | `text/disabled` | — |
+| Outline | Default | — | `text/primary` | `border/default` |
+| Outline | Hover | `bg/surface-hover` | `text/primary` | `border/strong` |
+| Outline | Active | `bg/surface-active` | `text/primary` | `border/strong` |
+| Outline | Focus | `bg/surface` | `text/primary` | `border/focus` |
+| Outline | Disabled | — | `text/disabled` | `border/disabled` |
+| Outline | Loading | — | `text/disabled` | `border/disabled` |
+| Ghost | Default | — | `text/primary` | — |
+| Ghost | Hover | `bg/surface-hover` | `text/primary` | — |
+| Ghost | Active | `bg/surface-active` | `text/primary` | — |
+| Ghost | Focus | `bg/surface` | `text/primary` | — |
+| Ghost | Disabled | — | `text/disabled` | — |
+| Ghost | Loading | — | `text/disabled` | — |
+| Destructive | Default | `bg/danger` | `text/on-solid` | — |
+| Destructive | Hover | `bg/danger-hover` | `text/on-solid` | — |
+| Destructive | Active | `bg/danger-active` | `text/on-solid` | — |
+| Destructive | Focus | `bg/danger` | `text/on-solid` | — |
+| Destructive | Disabled | `bg/disabled` | `text/disabled` | — |
+| Destructive | Loading | `bg/disabled` | `text/disabled` | — |
+
+Every `State=Focus` row also carries the `Focus/Ring` effect style (`Focus/Ring
+Danger` on Destructive) and `clipsContent = true`; Loading draws the spinner over
+the row's palette. Icon colour tracks the text column — `icon/on-accent` on
+Primary, `icon/on-solid` on Destructive, `icon/disabled` when disabled or loading.
+
+**Outline carries no fill in Default, Disabled and Loading by design.** It is the
+one variant defined by its border rather than a fill, so an absent fill in those
+states is intentional — not a missing token.
+
+**The `bg/surface` fill Outline and Ghost carry in Focus is a Figma-renderer
+workaround, not part of the contract.** A spread-only shadow is not cast by a
+transparent node (LLM-GUIDE §13), so the ring needs a fill to exist; `bg/surface`
+matches `bg/canvas` in Light and is invisible on the page. It is **not reproduced
+in CSS** — `box-shadow` paints without any fill — so in code both variants stay
+transparent under `:focus-visible`.
 
 **When to use which variant**
 
