@@ -119,6 +119,13 @@ The bare atom ships without a label. The pairing is a molecule:
 Each nests a real exposed `Label` instance, plus an optional `Description` line the
 molecule owns.
 
+`Checkbox Field` also mirrors the atom's `Checked` / `Indeterminate` booleans.
+Figma cannot forward a boolean into a nested instance, so its `Control` holds
+three pre-set Checkbox instances: `Off`, plus a `Checked` group containing `On`
+and `Mixed`. The molecule's `Checked` drives the group and `Indeterminate` drives
+`Mixed` inside it — the same containment the atom uses, so switching `Checked`
+off clears indeterminate here too.
+
 `Switch Field` is the one form row where the control comes *after* the label,
 because a settings row reads as a statement whose state sits at the end of the line.
 

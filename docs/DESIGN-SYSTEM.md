@@ -90,6 +90,23 @@ A variant axis is for things that change the component's *appearance rules*
 *contents* (`Label`, `Icon left`, `Show status`). Putting content in variants is the
 single fastest way to a 400-variant component set nobody can use.
 
+**A binary state is a boolean, not a two-value axis.** The axis/property split is
+about appearance versus content, but it is crossed by a second question: how many
+values are there? A dropdown to choose between true and false costs a click and a
+read every time, and multiplies the variant count by two for nothing. Checkbox's
+`Checked` and `Indeterminate` are booleans for that reason. Where the two states
+look different, express each as an absolutely-positioned overlay whose visibility
+the boolean drives. `State` stays an axis: five values, and each repaints the
+whole control.
+
+**Dependencies between booleans are expressed by containment.** Figma has no
+logic between properties — nothing fires when one is switched off. So when one
+state is a refinement of another (indeterminate is a kind of checked, not an
+alternative to it), nest the dependent layer *inside* the one it depends on.
+Hiding the parent takes the child with it regardless of the child's own toggle,
+which is the only way to keep two booleans from contradicting each other. It also
+disposes of the both-on case, since the inner layer covers the outer one.
+
 ### 1.8 Accessibility is a token decision, not a review step
 
 White on emerald/600 is 3.7:1 — a fail. There are two ways to fix that: darken the
@@ -455,6 +472,9 @@ display and heading roles, **weight** on display roles, and the **families**.
 | `Focus/Ring Danger` | same, in `border/danger` | Focus on a destructive control |
 | `Inset/Sunken` | inner 0 1 2 | Pressed wells, code blocks |
 
+The two `Focus/*` styles are spread-only, which makes them conditional on the
+host node — see §10 before applying one to a new component.
+
 ---
 
 ## 5. Adding a new niche
@@ -630,7 +650,14 @@ plus a narrower surface-coloured gap that covers the ring's inner half; get the
 order wrong and the ring simply covers the gap, leaving a solid band welded to the
 control instead of a ring floating outside it.
 
-One consequence worth knowing: a spread-only drop shadow does not paint on a
-COMPONENT node, only on a FRAME. Button therefore draws its focus ring as a
-stroked node; Input, Textarea, Number Input and Color Picker put the effect style
-on their inner `Field` frame, where it renders normally.
+Two renderer conditions govern whether a ring appears at all, and both are easy
+to trip:
+
+- **The node must clip its content.** A spread-only shadow (radius 0) is not
+  painted unless `clipsContent` is on. Blurred shadows ignore this, so every
+  `Elevation/*` style works everywhere and only the focus rings are exposed. Every
+  control carrying `Focus/Ring` has the flag on — Button's `State=Focus` variants,
+  and the inner `Field` frame in Input, Textarea, Number Input and Color Picker.
+- **The node must have a fill.** A shadow is cast by opaque pixels, so a
+  transparent control casts none. Button's Ghost variant takes `bg/surface-hover`
+  in Focus for exactly this reason — the same fill it already uses on hover.
