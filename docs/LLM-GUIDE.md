@@ -41,16 +41,35 @@ literally. They are ordered by how often violating them causes damage.
 12. **`clone()` on a variant drops every `componentPropertyReferences`.** After
     cloning a variant to build a new state, re-wire the references by hand or the
     new variant silently ignores Label, icon and visibility properties.
-13. **A spread-only drop shadow (radius 0) does not paint on a COMPONENT node.**
-    It paints fine on a FRAME. Put focus rings on an inner frame, or draw them as
-    a stroked node. Verify with a screenshot — the data reads back correct either
-    way.
+13. **A spread-only drop shadow (radius 0) is not painted unless the node has
+    `clipsContent = true`.** Node type is irrelevant — COMPONENT and FRAME behave
+    identically, and the parent's clipping does not matter. Blurred shadows are
+    unaffected, which is why elevation never exposes this and a focus ring
+    always does. A shadow is also cast by the node's *fill*: a transparent node
+    casts nothing, so a Ghost-style control needs a fill in its focus state.
+    Verify with a screenshot — the effect reads back as present either way.
 14. **A blocking state renders on the disabled palette.** `Loading`, and any other
     state that suspends interaction, uses `bg/disabled` / `text/disabled` /
     `icon/disabled` plus a motion affordance — never the live palette. A control
     that still looks pressable while it is not is the bug this rule exists to
     prevent. Semantics stay separate: `aria-busy`, not a permanent `disabled`.
-15. Every new component must be added to a Theme Lab specimen and checked against
+15. **A binary state is a BOOLEAN property; a multi-value state is a variant
+    axis.** Where the true and false states look different, add an absolutely-
+    positioned overlay inside each variant and reference the boolean from its
+    `visible`.
+15a. **Figma has no logic between properties — a dependency between two booleans
+    must be built as containment.** Nest the dependent layer inside the one it
+    depends on, so hiding the parent hides it too whatever its own toggle says.
+    Siblings can contradict each other (Checkbox showing a dash while unchecked);
+    a nested pair cannot. Nesting also resolves the both-on case by z-order.
+16. **A boolean cannot be forwarded into a nested instance.** A molecule that
+    needs to drive an atom's boolean holds one pre-set instance per appearance,
+    with the molecule's own boolean on each one's `visible` — and mirrors the
+    atom's nesting, or the dependency stops holding at the molecule level.
+17. **`componentPropertyReferences` cannot be set on an instance's sublayers.**
+    When restoring references after `clone()`, stop the walk at every INSTANCE —
+    the instance node itself takes references, its children throw.
+18. Every new component must be added to a Theme Lab specimen and checked against
     Shape `Sharp` + `Rounded`, Theme `Dark`, Density `Compact` and Typography
     `Editorial` before it is called done.
 

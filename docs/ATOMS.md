@@ -59,8 +59,9 @@ Button  (hug width, fixed height)
   Label        2px optical wrapper
     Text       the TEXT property target
   Icon right   optional, size/icon/*
-  Focus ring   absolute, visible only in Focus
 ```
+
+Every state shares that anatomy — there is no node that exists only in one variant.
 
 **Loading** — renders on the disabled palette: `bg/disabled` fill,
 `text/disabled` label, `icon/disabled` spinner, in every one of the five variants.
@@ -80,12 +81,16 @@ In code the control carries `aria-busy="true"` and `disabled` — it is temporar
 inactive, not permanently unavailable, so the label text must stay readable rather
 than being replaced by the spinner.
 
-**Focus** — a stroked ring node sitting 4px outside the control, one radius step
-larger, in `border/focus` (`border/danger` on Destructive). It is a node rather
-than the `Focus/Ring` effect style because a spread-only drop shadow does not
-paint on a COMPONENT node; the field atoms can use the style because theirs sits
-on an inner `Field` frame. The ring uses STRETCH constraints, so it tracks the
-button as the label changes its width.
+**Focus** — the `Focus/Ring` effect style (`Focus/Ring Danger` on Destructive):
+a 4px ring in `effect/focus-ring` with a 2px `bg/surface` gap painted over its
+inner half. Because it is a shadow rather than a node, it inherits the button's
+own radius and tracks its width with no constraints to maintain.
+
+Two things make it render, and both are non-obvious. The `State=Focus` variants
+set `clipsContent = true` — a spread-only shadow is not painted without it. And
+Ghost takes a `bg/surface-hover` fill in Focus, because a shadow is cast by a
+fill and a transparent button casts none; it is the same fill Ghost already uses
+on hover, so focus reads as hover plus a ring. See DESIGN-SYSTEM §10.
 
 The label sits in its own 2px auto-layout wrapper. That single wrapper pushes the
 text off the button's outer edge by the amount an icon box already carries as
@@ -186,18 +191,47 @@ format; in Error it becomes the error message and turns `text/danger` automatica
 - Use Input for numeric entry with steppers (Number Input), multi-line answers
   (Textarea) or a fixed list (Select).
 
-## Checkbox — 24 variants
+## Checkbox — 10 variants
 
 Binary toggle, independent of its siblings.
 
 | Axis | Values |
 |---|---|
-| `Checked` | False · True · Indeterminate |
 | `Size` | SM (16) · MD (20) |
-| `State` | Default · Hover · Disabled · Error |
+| `State` | Default · Hover · Focus · Disabled · Error |
+
+**Properties:** `Checked` (bool) · `Indeterminate` (bool)
+
+**Anatomy**
+
+```
+Checkbox  (the empty box: bg/surface + border/strong)
+  Checked            absolute overlay, accent fill + check mark
+    Indeterminate    absolute overlay, accent fill + dash — inside Checked
+```
+
+**Why checked is a boolean, not a variant axis** — a checkbox is binary, and a
+three-value dropdown made every consumer open a list to find "True". Both
+overlays are absolutely positioned and fill the box, so each variant still
+carries its own per-state palette.
+
+**Why Indeterminate is nested inside Checked** — because it is a *kind of*
+checked, not an alternative to it. Figma has no logic between properties, so a
+dependency has to be expressed as containment: switching `Checked` off hides the
+whole branch, and `Indeterminate` goes with it no matter what its own toggle
+says. As siblings the two could disagree — an unchecked box still showing a
+dash. Nesting also settles the both-on case for free, since the dash sits over
+the check.
+
+`State` stays a variant — it is not binary, and it repaints the whole control.
+See DESIGN-SYSTEM §1.7.
+
+**Focus** — the `Focus/Ring` effect style; the variant sets `clipsContent = true`
+because a spread-only shadow is not painted without it (DESIGN-SYSTEM §10).
 
 **Tokens** — box `size/selection/sm|md`, radius `radius/xs`, unchecked
-`bg/surface` + `border/strong`, checked `bg/accent` + `icon/on-accent` mark.
+`bg/surface` + `border/strong`, checked `bg/accent` + `icon/on-accent` mark,
+focus border `border/focus`.
 
 **Rules**
 
@@ -209,7 +243,7 @@ Binary toggle, independent of its siblings.
 
 ---
 
-## Radio — 16 variants
+## Radio — 20 variants
 
 One option from a mutually exclusive set.
 
@@ -217,7 +251,14 @@ One option from a mutually exclusive set.
 |---|---|
 | `Selected` | False · True |
 | `Size` | SM (16) · MD (20) |
-| `State` | Default · Hover · Disabled · Error |
+| `State` | Default · Hover · Focus · Disabled · Error |
+
+`Selected` stays a variant axis rather than becoming a boolean like Checkbox's
+`Checked`. A radio is never toggled on its own — it is switched as a group, and
+the selected member is chosen by swapping variants across the whole set.
+
+**Focus** — the `Focus/Ring` effect style; the variant sets `clipsContent = true`
+(DESIGN-SYSTEM §10). Unselected focus also switches the border to `border/focus`.
 
 **Tokens** — box `size/selection/sm|md`, radius `radius/full`, dot
 `size/selection/dot` (8px) filled `bg/surface` on an `bg/accent` box.
