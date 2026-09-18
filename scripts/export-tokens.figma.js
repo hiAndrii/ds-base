@@ -17,7 +17,7 @@
 //
 // This script never writes. It is safe to run at any time.
 
-const PART = 'primitives'; // primitives | brand | theme | space | shape | typography | effects
+const PART = 'primitives'; // primitives | brand | theme | space | shape | typography | motion | effects
 
 // Figma collection name -> the key it occupies in tokens.json.
 const COLLECTION_OF = {
@@ -27,6 +27,7 @@ const COLLECTION_OF = {
   space: '4. Space & Size',
   shape: '5. Shape',
   typography: '6. Typography',
+  motion: '7. Motion',
 };
 
 const vars = await figma.variables.getLocalVariablesAsync();

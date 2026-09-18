@@ -72,6 +72,28 @@ literally. They are ordered by how often violating them causes damage.
 18. Every new component must be added to a Theme Lab specimen and checked against
     Shape `Sharp` + `Rounded`, Theme `Dark`, Density `Compact` and Typography
     `Editorial` before it is called done.
+19. **When reading bindings, descend into hidden nodes and nested instances.**
+    `figma.skipInvisibleInstanceChildren` defaults to `true` in the plugin
+    environment, so a traversal silently drops the children of any instance whose
+    `visible = false` — and the properties you most need often live exactly there.
+    A Button's icon colour, for example, is bound on the child `Vector` **inside**
+    the `Icon left` / `Icon right` instances, which ship hidden (`Show icon = off`);
+    a naive walk reports "no binding" and the whole per-variant icon palette goes
+    invisible. Figma's own Selection-colors panel shows these, which is why a
+    binding can be real yet absent from your read. Set
+    `figma.skipInvisibleInstanceChildren = false` before any binding audit, walk
+    through `INSTANCE` children, and read the colour off the leaf `Vector`
+    (fill or stroke), not off the instance. When a read disagrees with what the
+    Figma UI shows, suspect the reader before the data.
+20. **Motion comes from tokens, never literals.** Durations and easing live in
+    `7. Motion` and compile to `--duration-*` / `--easing-*`. Write
+    `transition: background-color var(--duration-base) var(--easing-standard)`, never
+    a literal `200ms` or `cubic-bezier(...)`. **Never `transition: all`** — enumerate
+    the properties, and keep the focus-ring `box-shadow` out of every transition list
+    so `:focus-visible` stays instant (WCAG 2.4.7). Do not add per-component
+    `prefers-reduced-motion` queries — `tokens.css` zeroes transition durations
+    globally; only `duration/spinner` (a loop) is exempt, so keep loop periods on
+    that token.
 
 ---
 

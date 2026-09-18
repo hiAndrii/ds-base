@@ -22,7 +22,7 @@ const RAW = resolve(ROOT, 'tokens/.raw');
 const OUTPUT = resolve(ROOT, 'tokens/tokens.json');
 
 // Emission order of the final file. Also the order slices are required in.
-const PARTS = ['primitives', 'brand', 'theme', 'space', 'shape', 'typography', 'effects'];
+const PARTS = ['primitives', 'brand', 'theme', 'space', 'shape', 'typography', 'motion', 'effects'];
 
 const META = {
   $schema: 'design-system-base/v1',
@@ -44,6 +44,7 @@ const META = {
     'accent/solid is the ramp step where white text clears 4.5:1; bright hues (orange, cyan, emerald, teal) sit one step deeper than blues and violets. It doubles as the accent step that is legible AS text on a light surface.',
     'Font sizes are identical across all Typography modes so switching typeface restyles without reflowing.',
     'Effect styles carry geometry here and colour by alias, so a shadow keeps its shape while its colour follows the theme.',
+    'Motion is mode-invariant (not a dial): duration/* are milliseconds, easing/* are explicit cubic-bezier or linear. duration/spinner is a loop period and is exempt from the prefers-reduced-motion reset.',
   ],
 };
 
