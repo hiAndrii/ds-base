@@ -28,6 +28,7 @@
         "tokens": "node scripts/build-tokens.mjs",
         "build": "vite build",
         "dev": "vite build --watch",
+        "sandbox": "vite",
         "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
