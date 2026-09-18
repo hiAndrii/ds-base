@@ -111,47 +111,53 @@ and the icon's own ~2px inset are counted. Do not "fix" it to 8.
 
 **State palette**
 
-Colour is a function of `Variant` × `State`; `Size` never changes it. The table is
-read from the component's real variable bindings. `—` means no bound paint — the
-node is transparent, or carries no stroke.
+Colour is a function of `Variant` × `State`; `Size` never changes it. Every column
+is read from the component's real variable bindings, including nodes hidden by
+default — the icon colour lives on the icon instance's child `Vector`, not the
+instance, and is only visible to a reader that descends into hidden nested
+instances (see LLM-GUIDE §19). `—` means no bound paint: the node is transparent,
+carries no stroke, or (Effect) has no effect style.
 
-| Variant | State | Fill | Text | Stroke |
-|---|---|---|---|---|
-| Primary | Default | `bg/accent` | `text/on-accent` | — |
-| Primary | Hover | `bg/accent-hover` | `text/on-accent` | — |
-| Primary | Active | `bg/accent-active` | `text/on-accent` | — |
-| Primary | Focus | `bg/accent` | `text/on-accent` | — |
-| Primary | Disabled | `bg/disabled` | `text/disabled` | — |
-| Primary | Loading | `bg/disabled` | `text/disabled` | — |
-| Secondary | Default | `bg/neutral` | `text/primary` | — |
-| Secondary | Hover | `bg/neutral-hover` | `text/primary` | — |
-| Secondary | Active | `bg/neutral-active` | `text/primary` | — |
-| Secondary | Focus | `bg/neutral` | `text/primary` | — |
-| Secondary | Disabled | `bg/disabled` | `text/disabled` | — |
-| Secondary | Loading | `bg/disabled` | `text/disabled` | — |
-| Outline | Default | — | `text/primary` | `border/default` |
-| Outline | Hover | `bg/surface-hover` | `text/primary` | `border/strong` |
-| Outline | Active | `bg/surface-active` | `text/primary` | `border/strong` |
-| Outline | Focus | `bg/surface` | `text/primary` | `border/focus` |
-| Outline | Disabled | — | `text/disabled` | `border/disabled` |
-| Outline | Loading | — | `text/disabled` | `border/disabled` |
-| Ghost | Default | — | `text/primary` | — |
-| Ghost | Hover | `bg/surface-hover` | `text/primary` | — |
-| Ghost | Active | `bg/surface-active` | `text/primary` | — |
-| Ghost | Focus | `bg/surface` | `text/primary` | — |
-| Ghost | Disabled | — | `text/disabled` | — |
-| Ghost | Loading | — | `text/disabled` | — |
-| Destructive | Default | `bg/danger` | `text/on-solid` | — |
-| Destructive | Hover | `bg/danger-hover` | `text/on-solid` | — |
-| Destructive | Active | `bg/danger-active` | `text/on-solid` | — |
-| Destructive | Focus | `bg/danger` | `text/on-solid` | — |
-| Destructive | Disabled | `bg/disabled` | `text/disabled` | — |
-| Destructive | Loading | `bg/disabled` | `text/disabled` | — |
+| Variant | State | Fill | Text | Icon | Stroke | Effect |
+|---|---|---|---|---|---|---|
+| Primary | Default | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Hover | `bg/accent-hover` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Active | `bg/accent-active` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Focus | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | `Focus/Ring` |
+| Primary | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Primary | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Secondary | Default | `bg/neutral` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Hover | `bg/neutral-hover` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Active | `bg/neutral-active` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Focus | `bg/neutral` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
+| Secondary | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Secondary | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Outline | Default | — | `text/primary` | `icon/secondary` | `border/default` | — |
+| Outline | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | `border/strong` | — |
+| Outline | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | `border/strong` | — |
+| Outline | Focus | `bg/surface` | `text/primary` | `icon/secondary` | `border/focus` | `Focus/Ring` |
+| Outline | Disabled | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
+| Outline | Loading | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
+| Ghost | Default | — | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Focus | `bg/surface` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
+| Ghost | Disabled | — | `text/disabled` | `icon/disabled` | — | — |
+| Ghost | Loading | — | `text/disabled` | `icon/disabled` | — | — |
+| Destructive | Default | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | — |
+| Destructive | Hover | `bg/danger-hover` | `text/on-solid` | `icon/on-solid` | — | — |
+| Destructive | Active | `bg/danger-active` | `text/on-solid` | `icon/on-solid` | — | — |
+| Destructive | Focus | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | `Focus/Ring Danger` |
+| Destructive | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Destructive | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
 
-Every `State=Focus` row also carries the `Focus/Ring` effect style (`Focus/Ring
-Danger` on Destructive) and `clipsContent = true`; Loading draws the spinner over
-the row's palette. Icon colour tracks the text column — `icon/on-accent` on
-Primary, `icon/on-solid` on Destructive, `icon/disabled` when disabled or loading.
+The **Icon** column is the colour bound on both the left and right icon slots (they
+always match). **Spinner:** the structural spinner is bound to `icon/disabled` and
+is shown only in Loading, where it replaces the left icon slot; the label stays on
+the row's `text/disabled`. **Effect** carries the focus ring, and every
+`State=Focus` row also sets `clipsContent = true` — both are Figma-renderer
+concerns; neither is reproduced in CSS (see below). `strokeWeight` (Outline 1px,
+spinner 1.5px) and `opacity` (1) never vary by state, so they are not columns.
 
 **Outline carries no fill in Default, Disabled and Loading by design.** It is the
 one variant defined by its border rather than a fill, so an absent fill in those

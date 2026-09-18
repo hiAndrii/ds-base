@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en" data-brand="base" data-theme="light" data-density="default" data-shape="soft" data-type="studio">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Design System Base — components</title>
+
+    <!--
+      This page consumes the LIBRARY the way an app would: the built package
+      entry (./dist/index.js) plus its two shipped stylesheets. It never imports
+      from src/. Served by the Vite dev server (`npm run sandbox`), which resolves
+      the external peer `react` / `react-dom` from local node_modules — no CDN,
+      works offline. Run `npm run build` first so dist/ exists.
+    -->
+    <link rel="stylesheet" href="./dist/tokens.css">
+    <link rel="stylesheet" href="./dist/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Geist+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <style>
+        /* Page chrome only — every value is a semantic token. The buttons carry
+           no page styles; they render entirely from the library's CSS. */
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--bg-canvas);
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            font-size: var(--body-md-size);
+            line-height: var(--body-md-line-height);
+        }
+
+        .panel {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-md);
+            align-items: flex-end;
+            padding: var(--space-md) var(--space-xl);
+            background: var(--bg-surface);
+            border-bottom: var(--border-width-thin) solid var(--border-default);
+            box-shadow: var(--elevation-sm);
+        }
+
+        .dial { display: flex; flex-direction: column; gap: var(--space-2xs); }
+
+        .dial > span {
+            font-size: var(--overline-size);
+            line-height: var(--overline-line-height);
+            letter-spacing: var(--overline-tracking);
+            font-weight: var(--overline-weight);
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .dial select {
+            appearance: none;
+            padding: var(--space-2xs) var(--space-sm);
+            min-width: 168px;
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: var(--border-width-thin) solid var(--border-default);
+            border-radius: var(--radius-sm);
+            font-family: var(--font-body);
+            font-size: var(--label-md-size);
+            line-height: var(--label-md-line-height);
+            font-weight: var(--label-md-weight);
+        }
+
+        .dial select:focus-visible {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: var(--focus-ring);
+        }
+
+        main {
+            padding: var(--space-2xl) var(--space-xl) var(--space-5xl);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4xl);
+            max-width: 1120px;
+        }
+
+        section { display: flex; flex-direction: column; gap: var(--space-lg); }
+
+        .section-title {
+            font-family: var(--font-display);
+            font-size: var(--heading-md-size);
+            line-height: var(--heading-md-line-height);
+            letter-spacing: var(--heading-md-tracking);
+            font-weight: var(--heading-md-weight);
+            margin: 0;
+        }
+
+        .section-lede {
+            margin: 0;
+            max-width: 60ch;
+            color: var(--text-secondary);
+            font-size: var(--body-sm-size);
+            line-height: var(--body-sm-line-height);
+        }
+
+        /* A labelled row of buttons. The label column keeps rows aligned. */
+        .row {
+            display: grid;
+            grid-template-columns: 96px 1fr;
+            gap: var(--space-lg);
+            align-items: center;
+            padding-bottom: var(--space-md);
+            border-bottom: var(--border-width-thin) solid var(--border-subtle);
+        }
+
+        .row:last-child { border-bottom: none; padding-bottom: 0; }
+
+        .row-label {
+            font-family: var(--font-mono);
+            font-size: var(--code-sm-size);
+            line-height: var(--code-sm-line-height);
+            color: var(--text-tertiary);
+        }
+
+        .cluster {
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel">
+        <label class="dial">
+            <span>Brand</span>
+            <select data-dial="brand">
+                <option value="base" selected>Base</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="ai">AI</option>
+                <option value="banking">Banking</option>
+                <option value="e-commerce">E-commerce</option>
+                <option value="crypto">Crypto</option>
+                <option value="education">Education</option>
+                <option value="wellness">Wellness</option>
+            </select>
+        </label>
+        <label class="dial">
+            <span>Theme</span>
+            <select data-dial="theme">
+                <option value="light" selected>Light</option>
+                <option value="dark">Dark</option>
+            </select>
+        </label>
+        <label class="dial">
+            <span>Density</span>
+            <select data-dial="density">
+                <option value="default" selected>Default</option>
+                <option value="compact">Compact</option>
+                <option value="comfortable">Comfortable</option>
+            </select>
+        </label>
+        <label class="dial">
+            <span>Shape</span>
+            <select data-dial="shape">
+                <option value="soft" selected>Soft</option>
+                <option value="crisp">Crisp</option>
+                <option value="sharp">Sharp</option>
+                <option value="rounded">Rounded</option>
+            </select>
+        </label>
+        <label class="dial">
+            <span>Typography</span>
+            <select data-dial="type">
+                <option value="studio" selected>Studio</option>
+                <option value="editorial">Editorial</option>
+                <option value="technical">Technical</option>
+                <option value="expressive">Expressive</option>
+            </select>
+        </label>
+    </div>
+
+    <main id="root"></main>
+
+    <script>
+        // Same generic dial handler as the token demo: data-dial → [data-*] on <html>.
+        for (const select of document.querySelectorAll('.dial select')) {
+            select.addEventListener('change', function () {
+                document.documentElement.setAttribute('data-' + this.dataset.dial, this.value);
+            });
+        }
+    </script>
+
+    <script type="module">
+        // react / react-dom are the library's external peers — the Vite dev
+        // server resolves them from local node_modules (offline, no CDN).
+        import { createElement as h, Fragment } from 'react';
+        import { createRoot } from 'react-dom/client';
+        // The library's built entry. This is the same file package.json maps the
+        // "ds-base" export to (exports "." → ./dist/index.js) — dist, never src.
+        import { Button } from './dist/index.js';
+
+        const VARIANTS = ['primary', 'secondary', 'outline', 'ghost', 'destructive'];
+        const SIZES = ['sm', 'md', 'lg'];
+
+        // Minimal inline icons (stroke = currentColor, so the icon token applies).
+        const icon = (d) => h('svg', {
+            viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+            strokeWidth: 1.5, strokeLinecap: 'round', strokeLinejoin: 'round',
+        }, h('path', { d }));
+        const Plus = icon('M12 5v14M5 12h14');
+        const ArrowRight = icon('M5 12h14M13 6l6 6-6 6');
+
+        const cluster = (nodes) => h('div', { className: 'cluster' }, nodes);
+        const row = (label, nodes) =>
+            h('div', { className: 'row' },
+                h('span', { className: 'row-label' }, label),
+                cluster(nodes));
+
+        // One button per variant, with shared extra props.
+        const perVariant = (size, extra = {}) =>
+            VARIANTS.map((variant) =>
+                h(Button, { key: variant, variant, size, ...extra },
+                    variant[0].toUpperCase() + variant.slice(1)));
+
+        const section = (title, lede, rows) =>
+            h('section', null,
+                h('h2', { className: 'section-title' }, title),
+                h('p', { className: 'section-lede' }, lede),
+                ...rows);
+
+        const app = h(Fragment, null,
+            section(
+                'Variants × sizes',
+                'The five variants at every size. Hover, press and Tab to a button to see the state transitions and the focus ring.',
+                SIZES.map((size) => row(size.toUpperCase(), perVariant(size))),
+            ),
+            section(
+                'Content & state',
+                'Icon slots take any ReactNode; loading and disabled are the only stateful props. All at size MD.',
+                [
+                    row('iconLeft', perVariant('md', { iconLeft: Plus })),
+                    row('iconRight', perVariant('md', { iconRight: ArrowRight })),
+                    row('loading', perVariant('md', { loading: true })),
+                    row('disabled', perVariant('md', { disabled: true })),
+                ],
+            ),
+        );
+
+        createRoot(document.getElementById('root')).render(app);
+    </script>
+</body>
+
+</html>

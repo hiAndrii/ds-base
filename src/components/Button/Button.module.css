@@ -1,0 +1,244 @@
+/*
+ * Button — styled entirely from semantic tokens (src/styles/tokens.css).
+ *
+ * The colour rules below are transcribed from the Variant × State table in
+ * docs/ATOMS.md §Button. The Figma "State" axis is not modelled as data here:
+ *   Default  → the base variant rule
+ *   Hover    → :hover      Active → :active      Focus → :focus-visible
+ *   Disabled → :disabled (also covers Loading, whose palette is identical)
+ *
+ * Two Figma-renderer workarounds from that table are deliberately NOT ported:
+ *   - the bg/surface fill on Outline/Ghost Focus — box-shadow is cast without a
+ *     fill, so both stay transparent under :focus-visible;
+ *   - clipsContent — it must NOT become overflow: hidden, which would clip the
+ *     focus ring, since box-shadow paints outside the element.
+ */
+
+.button {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2xs);
+  border: none;
+  font-family: var(--font-body);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  white-space: nowrap;
+  user-select: none;
+  /* Hover/active feedback animates; the focus-ring box-shadow is deliberately
+   * NOT listed, so :focus-visible stays instant (see DESIGN-SYSTEM §4.8). */
+  transition:
+    background-color var(--duration-base) var(--easing-standard),
+    border-color var(--duration-base) var(--easing-standard),
+    color var(--duration-base) var(--easing-standard);
+}
+
+/* Focus — one declaration, painted outside the box. No fill, no clipping. */
+.button:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+.destructive:focus-visible {
+  box-shadow: var(--focus-ring-danger);
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  /* The flip into disabled/loading is instant — only hover/active animate. */
+  transition: none;
+}
+
+/* The label's 2px optical wrapper (DESIGN-SYSTEM §1.6 / LLM-GUIDE §4). */
+.label {
+  padding-inline: var(--space-optical);
+}
+
+/* Icon slots and the structural spinner share the per-size icon box. */
+.icon,
+.spinner {
+  flex: none;
+}
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Structural spinner — visible only while loading, on the disabled palette.
+ * Motion spec (ATOMS §Spinner): rotate 360°, 1s, linear, infinite. */
+.spinner {
+  box-sizing: border-box;
+  border: 2px solid var(--icon-disabled);
+  border-top-color: transparent;
+  border-radius: var(--radius-full);
+  /* Continuous rotation loop + a one-shot opacity fade-in as it replaces the
+   * left slot on entering Loading. The palette flip stays instant (above). */
+  animation:
+    spin var(--duration-spinner) var(--easing-linear) infinite,
+    spinner-in var(--duration-base) var(--easing-standard);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spinner-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* ---- Sizes: height, padding, radius, icon box, label type (geometry table). */
+
+.sm {
+  height: var(--size-control-sm);
+  padding-inline: var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: var(--label-sm-size);
+  line-height: var(--label-sm-line-height);
+  letter-spacing: var(--label-sm-tracking);
+  font-weight: var(--label-sm-weight);
+}
+.sm .icon,
+.sm .spinner {
+  width: var(--size-icon-sm);
+  height: var(--size-icon-sm);
+}
+
+.md {
+  height: var(--size-control-md);
+  padding-inline: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: var(--label-md-size);
+  line-height: var(--label-md-line-height);
+  letter-spacing: var(--label-md-tracking);
+  font-weight: var(--label-md-weight);
+}
+.md .icon,
+.md .spinner {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+}
+
+.lg {
+  height: var(--size-control-lg);
+  padding-inline: var(--space-lg);
+  border-radius: var(--radius-lg);
+  font-size: var(--label-lg-size);
+  line-height: var(--label-lg-line-height);
+  letter-spacing: var(--label-lg-tracking);
+  font-weight: var(--label-lg-weight);
+}
+.lg .icon,
+.lg .spinner {
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+}
+
+/* ---- Variants: Default / Hover / Active per the Variant × State table. ---- */
+
+/* Primary */
+.primary {
+  background-color: var(--bg-accent);
+  color: var(--text-on-accent);
+}
+.primary .icon {
+  color: var(--icon-on-accent);
+}
+.primary:not(:disabled):hover {
+  background-color: var(--bg-accent-hover);
+}
+.primary:not(:disabled):active {
+  background-color: var(--bg-accent-active);
+}
+
+/* Secondary */
+.secondary {
+  background-color: var(--bg-neutral);
+  color: var(--text-primary);
+}
+.secondary .icon {
+  color: var(--icon-secondary);
+}
+.secondary:not(:disabled):hover {
+  background-color: var(--bg-neutral-hover);
+}
+.secondary:not(:disabled):active {
+  background-color: var(--bg-neutral-active);
+}
+
+/* Outline — fill-less by design; defined by its border. */
+.outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+}
+.outline .icon {
+  color: var(--icon-secondary);
+}
+.outline:not(:disabled):hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+}
+.outline:not(:disabled):active {
+  background-color: var(--bg-surface-active);
+  border-color: var(--border-strong);
+}
+.outline:focus-visible {
+  border-color: var(--border-focus);
+}
+
+/* Ghost — fill-less by design; no border. */
+.ghost {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+.ghost .icon {
+  color: var(--icon-secondary);
+}
+.ghost:not(:disabled):hover {
+  background-color: var(--bg-surface-hover);
+}
+.ghost:not(:disabled):active {
+  background-color: var(--bg-surface-active);
+}
+
+/* Destructive */
+.destructive {
+  background-color: var(--bg-danger);
+  color: var(--text-on-solid);
+}
+.destructive .icon {
+  color: var(--icon-on-solid);
+}
+.destructive:not(:disabled):hover {
+  background-color: var(--bg-danger-hover);
+}
+.destructive:not(:disabled):active {
+  background-color: var(--bg-danger-active);
+}
+
+/* ---- Disabled / Loading palette (last, so it wins on ties). ------------- */
+
+.button:disabled {
+  color: var(--text-disabled);
+}
+.button:disabled .icon {
+  color: var(--icon-disabled);
+}
+.primary:disabled,
+.secondary:disabled,
+.destructive:disabled {
+  background-color: var(--bg-disabled);
+}
+.outline:disabled {
+  background-color: transparent;
+  border-color: var(--border-disabled);
+}
+.ghost:disabled {
+  background-color: transparent;
+}
