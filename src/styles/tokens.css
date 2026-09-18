@@ -508,6 +508,11 @@
   --overline-line-height: var(--p-line-height-16);
   --overline-tracking: 0.8px;
   --overline-weight: 600;
+  /* motion: durations (ms) and easing, mode-invariant */
+  --duration-base: 200ms;
+  --duration-spinner: 1000ms;
+  --easing-standard: cubic-bezier(0, 0, 0.58, 1);
+  --easing-linear: linear;
   /* effects: geometry fixed, colour follows the theme */
   --elevation-xs: 0px 1px 2px 0px var(--effect-shadow-sm);
   --elevation-sm: 0px 2px 4px -1px var(--effect-shadow-sm), 0px 1px 2px 0px var(--effect-shadow-sm);
@@ -518,6 +523,12 @@
   --focus-ring: 0px 0px 0px 2px var(--bg-surface), 0px 0px 0px 4px var(--effect-focus-ring);
   --focus-ring-danger: 0px 0px 0px 2px var(--bg-surface), 0px 0px 0px 4px var(--border-danger);
   --inset-sunken: inset 0px 1px 2px 0px var(--effect-shadow-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-base: 0ms;
+  }
 }
 
 [data-brand="base"] {

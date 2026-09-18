@@ -140,9 +140,11 @@ The correct choice is the default choice, and there is nothing to remember.
 | 4 | `4. Space & Size` | Default, Compact, Comfortable | 48 | gap / width-height / stroke-float |
 | 5 | `5. Shape` | Soft, Crisp, Sharp, Rounded | 9 | corner-radius |
 | 6 | `6. Typography` | Studio, Editorial, Technical, Expressive | 79 | font-family / size / line-height / letter-spacing / font-style |
+| 7 | `7. Motion` | Value | 4 | `[]` — not node-bound |
 
-501 variables. Four of the six are dials a designer switches from the Appearance
-panel; Primitives and Theme are machinery.
+505 variables. Four of the seven are dials a designer switches from the Appearance
+panel; Primitives, Theme and Motion are machinery. Motion is mode-invariant — it
+carries the same durations and easing under every dial, like Elevation (§4.7).
 
 ### 2.1a Why shape and typeface are their own dials
 
@@ -475,6 +477,42 @@ display and heading roles, **weight** on display roles, and the **families**.
 The two `Focus/*` styles are spread-only, which makes them conditional on the
 host node — see §10 before applying one to a new component.
 
+### 4.8 Motion
+
+Timing and feel are tokens, not per-component values, so every component animates on
+the same clock. Like Elevation, motion is mode-invariant — one set of values under
+every dial.
+
+| Token | Value | Use |
+|---|---|---|
+| `duration/base` | 200ms | The default for a UI state change — hover / active fills, a fade-in |
+| `duration/spinner` | 1000ms | The spinner's rotation period (a loop, not a transition) |
+| `easing/standard` | `cubic-bezier(0, 0, 0.58, 1)` | Every transition — the drawn Ease Out, written explicitly so Figma and CSS carry the identical curve |
+| `easing/linear` | `linear` | Continuous / mechanical motion (spinner, progress) where a curve would look broken |
+
+The scale starts deliberately small: **one** transition step. A second (`fast`,
+`slow`, `slower`) is added the day a component needs it — a new variable in
+`7. Motion`, re-export, re-compile. Nothing restructures, because the compiler
+handles motion generically (durations get `ms`, every `duration/*` except
+`duration/spinner` is zeroed under reduced motion). Name by role (`base`), never by
+number, and reference the token, never the literal.
+
+**What animates, and what must not.** Animate `background-color`, `border-color`,
+`color`, `opacity`, `transform`, and `box-shadow` **only** for elevation. Never
+animate the **focus ring** — it must appear instantly (WCAG 2.4.7; a fade lags a
+keyboard user and smears when focus moves quickly, and focus is a system state, not
+an object in motion). Never animate layout-affecting properties (`width`, `height`,
+`top`, `left` — use `transform`), and never the flip into disabled. The mechanism is
+a rule, not a habit: **never `transition: all`** — enumerate the properties, and keep
+the focus-ring `box-shadow` out of every transition list, so it stays instant while
+fills animate.
+
+**Reduced motion is handled once, in `tokens.css`.** The compiler emits a
+`@media (prefers-reduced-motion: reduce)` block that sets every transition duration
+to `0ms`; no component writes its own query. `duration/spinner` is exempt so the
+spinner keeps turning — it is the only "busy" affordance, which reduced motion
+permits.
+
 ---
 
 ## 5. Adding a new niche
@@ -659,5 +697,16 @@ to trip:
   control carrying `Focus/Ring` has the flag on — Button's `State=Focus` variants,
   and the inner `Field` frame in Input, Textarea, Number Input and Color Picker.
 - **The node must have a fill.** A shadow is cast by opaque pixels, so a
-  transparent control casts none. Button's Ghost variant takes `bg/surface-hover`
-  in Focus for exactly this reason — the same fill it already uses on hover.
+  transparent control casts none. Button's Outline and Ghost variants — the two with
+  no solid fill — take a `bg/surface` fill in Focus for exactly this reason; it
+  matches `bg/canvas` in Light, so the fill is invisible and exists only to cast the
+  ring.
+
+**None of these three cross into CSS — they are Figma-renderer facts, not the
+contract.** `box-shadow` paints outside the box with no clip and no fill, so in code
+Outline and Ghost stay transparent under `:focus-visible` and nothing clips. The
+third case is timing: Button's `Loading` transition is drawn with Smart Animate,
+which tweens *everything that changed at once* and cannot separate the fill from the
+spinner — so the prototype necessarily animates the palette. The contract keeps the
+palette flip **instant** and animates only the spinner's opacity (`duration/base`,
+`easing/standard`). Read the prototype for character, never as the literal spec.

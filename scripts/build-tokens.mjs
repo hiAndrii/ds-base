@@ -4,7 +4,7 @@
 //
 // How it works
 // ------------
-// The token graph has six collections. Primitives are the raw values and are
+// The token graph has seven collections. Primitives are the raw values and are
 // emitted with a `--p-` prefix so they can never be referenced by accident.
 // The five dials (Brand, Theme, Space & Size, Shape, Typography) each map to a
 // data-* attribute on <html>. Their default modes land in :root so a page with
@@ -86,6 +86,7 @@ function formatValue(name, value) {
 
   if (typeof value === 'number') {
     if (UNITLESS_GROUPS.has(group(name))) return String(value);
+    if (group(name) === 'duration') return `${value}ms`;
     return `${value}px`;
   }
 
@@ -149,6 +150,14 @@ for (const [key, cfg] of Object.entries(DIALS)) {
   rootParts.push(declarations(modeMap(tokens[key], cfg.default), cfg.guard));
 }
 
+// Motion is not a dial — durations and easing are the same in every mode, so
+// they are written once into :root, like effects. Durations compile to `ms`
+// (see formatValue), easings pass through as explicit cubic-bezier / linear.
+if (tokens.motion) {
+  rootParts.push(`  /* motion: durations (ms) and easing, mode-invariant */`);
+  rootParts.push(declarations(tokens.motion.tokens));
+}
+
 // Effect styles are not a dial — the geometry is the same in every mode, so
 // they are written once. Only their colour moves, and it moves on its own.
 if (tokens.effects) {
@@ -161,6 +170,19 @@ if (tokens.effects) {
 }
 
 blocks.push(`:root {\n${rootParts.join('\n')}\n}`);
+
+// Reduced-motion: collapse every transition duration to 0 in one place, so no
+// component needs its own media query. Loop periods (duration/spinner) are
+// exempt — the spinner is an essential "busy" affordance, not decoration.
+if (tokens.motion) {
+  const zeroed = Object.keys(tokens.motion.tokens).filter(
+    (name) => group(name) === 'duration' && name !== 'duration/spinner'
+  );
+  if (zeroed.length) {
+    const lines = zeroed.map((name) => `    ${varName(name)}: 0ms;`).join('\n');
+    blocks.push(`@media (prefers-reduced-motion: reduce) {\n  :root {\n${lines}\n  }\n}`);
+  }
+}
 
 // One selector per mode of every dial, so any dial can be set in a subtree.
 for (const [key, cfg] of Object.entries(DIALS)) {
