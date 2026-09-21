@@ -56,6 +56,7 @@ n.nicheAliases = n.brandTokens;
 // Brand x Shape x Typography x Density, then the same again in each Theme mode.
 n.dialCombos = tokens.brand.modes.length * tokens.shape.modes.length *
   tokens.typography.modes.length * tokens.space.modes.length;
+n.dialCombosWithTheme = n.dialCombos * tokens.theme.modes.length;
 
 const WORD = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9 };
 const asNumber = (s) => (WORD[s.toLowerCase()] !== undefined ? WORD[s.toLowerCase()] : Number(s));
@@ -72,6 +73,7 @@ const checks = [
   ['README.md', /\*\*(\d+)\s+×\s+(\d+)\s+×\s+(\d+)\s+×\s+(\d+)\s+=\s+(\d+)/,
     [tokens.brand.modes.length, tokens.shape.modes.length, tokens.typography.modes.length,
       tokens.space.modes.length, n.dialCombos]],
+  ['README.md', /\*\*(\d+) in Light and Dark\*\*/, [n.dialCombosWithTheme]],
 
   ['docs/DESIGN-SYSTEM.md', /\*\*(\d+) variables across (\w+) collections\.\*\*/,
     [n.variables, n.collections]],
@@ -87,6 +89,8 @@ const checks = [
   ['docs/DESIGN-SYSTEM.md', /(\d+)\s+×\s+(\d+)\s+×\s+(\d+)\s+×\s+(\d+)\s+=\s+\*\*(\d+)/,
     [tokens.brand.modes.length, tokens.shape.modes.length, tokens.typography.modes.length,
       tokens.space.modes.length, n.dialCombos]],
+  ['docs/DESIGN-SYSTEM.md', /\*\*(\d+) once Light and Dark are counted\*\*/,
+    [n.dialCombosWithTheme]],
 
   ['docs/LLM-GUIDE.md', /A niche is (\d+) aliases/, [n.nicheAliases]],
   ['docs/LLM-GUIDE.md', /Fill (\d+) aliases/, [n.nicheAliases]],

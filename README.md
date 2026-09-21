@@ -38,7 +38,9 @@ entirely to tokens, and every variation is a mode switch rather than a redraw.
 
 The dials are independent on purpose. A fintech product can take Banking's blue with
 Rounded corners; an AI tool can take violet with a Technical typeface. That is
-**8 × 4 × 4 × 3 = 384 legitimate combinations** from one set of components.
+**8 × 4 × 4 × 3 = 384 legitimate combinations** of brand, shape, typography and
+density — and each of them renders in both themes, so **768 in Light and Dark**
+together, from one set of components.
 
 Recommended starting combinations are in
 [docs/DESIGN-SYSTEM.md §6](docs/DESIGN-SYSTEM.md).
@@ -49,7 +51,7 @@ Recommended starting combinations are in
 
 ```
 1. Primitives  ──►  Brand · Shape · Typography  ──►  3. Theme  ──►  component
-   #4F46E5          accent/600 · radius/md           bg/accent      Button fill
+   #4F46E5          accent/solid · radius/md         bg/accent      Button fill
    raw, hidden      the dials                        per-theme      never hardcoded
 ```
 
@@ -79,12 +81,13 @@ it works.
 - **19 text styles**, every property bound to a variable
 - **9 effect styles** (elevation + focus), shadow colours theme-aware — styles, not
   variables, which is why the compiler reports 514 tokens: 505 + 9
-- **40 icons** on a 24px grid, 1.5px stroke
-- **20 atoms — the complete atomic layer** of the
+- **20 atoms plus an icon set of 40 — the complete atomic layer** of the
   [ux-components taxonomy](https://www.ux-components.com/components/atomic):
-  Avatar, Badge, Button, Checkbox, Chip, Color Picker, Icon, Image, Input, Label,
+  Avatar, Badge, Button, Checkbox, Chip, Color Picker, Image, Input, Label,
   Number Input, Progress, Radio, Rating, Separator, Skeleton, Slider, Spinner,
-  Switch, Textarea, Toggle — **309 variants, zero hardcoded values**
+  Switch, Textarea, Toggle — **309 variants, zero hardcoded values** — and Icon,
+  which is 40 single components on a 24px grid at 1.5px stroke rather than a
+  variant set
 - **3 molecules**: Checkbox Field, Radio Field, Switch Field — 42 variants
 - **Theme Lab**: two specimen components across five dial sweeps, 42 cards
 

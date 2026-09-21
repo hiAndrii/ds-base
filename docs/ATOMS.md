@@ -391,8 +391,9 @@ own whitespace the same way it does on Button. See DESIGN-SYSTEM §1.6.
 - Interactive or removable? That is a Chip, not a Badge.
 - Radius is `radius/xs`, so badges follow the brand shape dial. Override to
   `radius/full` for a pill.
-- Every solid carries a white label. Success and Warning sit one ramp step deeper
-  than their subtle counterparts so white clears 4.5:1 — the label never darkens.
+- Every solid carries a white label. Success and Warning sit at emerald/700 and
+  amber/700 rather than at the 500s and 600s their hues would otherwise take, so
+  white clears 4.5:1 — the label never darkens. See DESIGN-SYSTEM §1.8.
 
 ---
 
