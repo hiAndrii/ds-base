@@ -26,6 +26,7 @@
     "scripts": {
         "export": "node scripts/assemble-tokens.mjs",
         "tokens": "node scripts/build-tokens.mjs",
+        "check:docs": "node scripts/check-docs.mjs",
         "build": "vite build",
         "dev": "vite build --watch",
         "sandbox": "vite",

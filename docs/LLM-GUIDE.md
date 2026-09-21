@@ -15,7 +15,8 @@ literally. They are ordered by how often violating them causes damage.
    have empty scopes and exist only to be aliased. Bind `bg/accent`, `space/md`.
 3. **Never add a variant per icon.** Use an `INSTANCE_SWAP` property.
 4. **Never use a value that is not a multiple of 4** for spacing, sizing or radius.
-   Stroke widths (1, 1.5, 2, 3) and font sizes are the only exemptions.
+   Stroke widths (1, 1.5, 2, 3), font sizes and `space/optical` (2px) are the only
+   exemptions — see DESIGN-SYSTEM §1.5.
 5. **Never detach an instance.** Override the property instead.
 6. **Never set an explicit width on a hug component** (Button, Badge).
 7. **`figma.createAutoLayout()` gives the frame a default WHITE fill.** Set
@@ -152,6 +153,7 @@ const COLL = {
   space:      "VariableCollectionId:3:5",   // 4. Space & Size
   typography: "VariableCollectionId:3:6",   // 6. Typography
   shape:      "VariableCollectionId:43:2",  // 5. Shape       — all radius
+  motion:     "VariableCollectionId:215:2", // 7. Motion      — compiled, not bound
 };
 ```
 
@@ -241,9 +243,10 @@ await textNode.setTextStyleIdAsync(styles['Body/MD']);
 textNode.fills = [paint('text/primary')];
 ```
 
-Load the font before touching `characters`. Brand families are Geist, Plus Jakarta
-Sans, Manrope, IBM Plex Sans, Instrument Sans (styles `Regular`, `Medium`,
-`SemiBold`, `Bold`) and Geist Mono, JetBrains Mono.
+Load the font before touching `characters`. Typefaces live in `6. Typography`, not
+in Brand. The four modes resolve to exactly six families: Geist, Plus Jakarta Sans,
+IBM Plex Sans and Manrope for display and body (styles `Regular`, `Medium`,
+`SemiBold`, `Bold`), and Geist Mono and JetBrains Mono for code (`Regular`).
 
 ---
 
@@ -325,14 +328,18 @@ TOKENS
 
 ## 6. Adding a niche
 
-A niche is 25 aliases in `2. Brand`. Shape and typeface are separate dials and are
+A niche is 28 aliases in `2. Brand`. Shape and typeface are separate dials and are
 NOT part of a niche.
 
 1. Pick an accent hue and a neutral (`gray` cool / `slate` corporate / `sand` warm).
-2. Compute white-on-`<hue>/600`. Below 4.5:1 → `accent/contrast = gray/950`.
-   Amber, orange, emerald, cyan and lime always fail. Blue, indigo, violet, rose pass.
+2. Compute white-on-`<hue>/600`. At 4.5:1 or better that step is `accent/solid`;
+   below it, go one step deeper and measure again. Amber, orange, emerald, cyan and
+   teal land on 700; blue, indigo, violet and rose land on 600. Never darken the
+   label to fix contrast — move the fill (DESIGN-SYSTEM §1.8). `accent/contrast`
+   stays `gray/0`.
 3. `brandCollection.addMode("<Niche>")`.
-4. Fill 25 aliases: `accent/50…950`, `neutral/0…1000`, `accent/contrast`.
+4. Fill 28 aliases: `accent/50…950`, `neutral/0…1000`, `accent/contrast`, and
+   `accent/solid`, `accent/solid-hover`, `accent/solid-active`.
 5. Add one card to the Brand sweep in Theme Lab. That sweep is the acceptance test.
 
 Nothing in Theme, Space & Size, Shape, Typography or any component changes.
@@ -348,7 +355,7 @@ DESIGN-SYSTEM §6 for the recommended combinations.
 - [ ] Foreground matches its fill per the table in §2
 - [ ] Icons are `INSTANCE_SWAP`, not variants
 - [ ] Variant children were positioned after `combineAsVariants`
-- [ ] The component set has a description in the §4 format
+- [ ] The component set has a description in the §5 format
 - [ ] Sizing modes were set AFTER `resize()` — hug components actually hug
 - [ ] Icon + label pairs carry the `space/optical` wrapper on the label
 - [ ] No `createAutoLayout` frame left with its default white fill
@@ -364,7 +371,8 @@ DESIGN-SYSTEM §6 for the recommended combinations.
 `Theme Lab` is the page that proves the dials resolve. Two components —
 `Theme Lab / Specimen` (settings-panel atoms) and `Theme Lab / Specimen B` (controls
 and media) — each instanced 21 times across five sweeps: Brand (8), Color (2),
-Shape (4), Density (3), Typography (4). Together they cover all 20 atoms.
+Shape (4), Density (3), Typography (4). Together they are meant to cover all 20
+atoms — see the known gap in DESIGN-SYSTEM §9.
 
 **Rules when you touch it**
 

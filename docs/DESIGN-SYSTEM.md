@@ -19,7 +19,7 @@ system is in the decisions, so each one gets its own layer:
 |---|---|---|
 | Primitive | What values exist at all? | `indigo/600 = #4F46E5` |
 | Dial | Which of them is *ours*? | `accent/600 → indigo/600` · `radius/md → radius/12` |
-| Theme | What does that mean on this surface? | `bg/accent → accent/600` |
+| Theme | What does that mean on this surface? | `bg/accent → accent/solid` |
 | Component | What does this button use? | `fill → bg/accent` |
 
 There are five dials, not one. **Brand** answers the colour question, **Shape** the
@@ -142,9 +142,15 @@ The correct choice is the default choice, and there is nothing to remember.
 | 6 | `6. Typography` | Studio, Editorial, Technical, Expressive | 79 | font-family / size / line-height / letter-spacing / font-style |
 | 7 | `7. Motion` | Value | 4 | `[]` — not node-bound |
 
-505 variables. Four of the seven are dials a designer switches from the Appearance
-panel; Primitives, Theme and Motion are machinery. Motion is mode-invariant — it
-carries the same durations and easing under every dial, like Elevation (§4.7).
+**505 variables across seven collections.** Nine effect styles (§4.7) carry the
+elevation and focus geometry; they are styles, not variables, and are counted
+separately everywhere. The compiler reports 514 because it emits both: 505 + 9.
+
+Five of the seven are the dials of §1.1 — Brand, Theme, Space & Size, Shape and
+Typography — each switched from the Appearance panel. Primitives and Motion are
+machinery: Primitives are hidden by empty scopes (§1.3), and Motion is
+mode-invariant, carrying the same durations and easing under every dial, like
+Elevation (§4.7).
 
 ### 2.1a Why shape and typeface are their own dials
 
@@ -154,8 +160,9 @@ not a system. A fintech product may want Banking's blue with Rounded corners; an
 tool may want violet with a Technical typeface.
 
 Splitting them turns 8 presets into 8 × 4 × 4 × 3 = **384 legitimate combinations**
-from the same components. The cost is that a niche is no longer a single switch, so
-the recommended combinations are written down instead — see §6.
+of brand, shape, typography and density — each of which renders in both themes, so
+**768 once Light and Dark are counted**. The cost is that a niche is no longer a
+single switch, so the recommended combinations are written down instead — see §6.
 
 ### 2.2 Why Brand sits between Primitives and Theme
 
@@ -166,12 +173,12 @@ collection one mode per niche per theme: `Light`, `Dark`, `Healthcare Light`,
 
 Inserting Brand collapses it. Brand exposes an 11-step `accent/*` ramp and a 13-step
 `neutral/*` ramp. Theme aliases those ramps and knows nothing about hue. A new niche
-is 25 aliases in one collection — Theme is untouched, and both themes get it free.
+is 28 aliases in one collection — Theme is untouched, and both themes get it free.
 
 ```
-Theme::bg/accent  →  Brand::accent/600  →  Primitives::indigo/600   (Base)
-                                        →  Primitives::teal/600     (Healthcare)
-                                        →  Primitives::violet/600   (AI)
+Theme::bg/accent  →  Brand::accent/solid  →  Primitives::indigo/600   (Base)
+                                          →  Primitives::teal/700     (Healthcare)
+                                          →  Primitives::violet/600   (AI)
 ```
 
 ### 2.3 Why typography binds through variables rather than hardcoding
@@ -194,10 +201,13 @@ style swapping, no detaching.
 typeface, leading, tracking and weight — never from size. That is deliberate:
 switching typography restyles a finished layout without reflowing it.
 
-This is why all typefaces in the system share Figma style names — `Regular`, `Medium`,
-`SemiBold`, `Bold`. Inter spells it `Semi Bold`, which breaks the binding the moment
-the family changes, so Inter is deliberately *not* one of the four here. Geist, Plus
-Jakarta Sans, Manrope, IBM Plex Sans and Instrument Sans all agree.
+This is why every typeface a mode can resolve to shares Figma style names —
+`Regular`, `Medium`, `SemiBold`, `Bold`. Inter spells it `Semi Bold`, which breaks
+the binding the moment the family changes, so Inter is deliberately *not* one of the
+four. It stays in Primitives as an unused `font-family/*` step, as does Instrument
+Sans; a primitive no mode aliases costs nothing and keeps the option open. The six
+families the modes do resolve to — Geist, Plus Jakarta Sans, IBM Plex Sans, Manrope,
+Geist Mono and JetBrains Mono — all agree.
 
 ---
 
@@ -254,8 +264,9 @@ rest state.
 
 ### 4.2 Brand — the colour dial
 
-Brand carries colour identity and nothing else. 25 tokens: an 11-step `accent/*`
-ramp, a 13-step `neutral/*` ramp, and `accent/contrast`.
+Brand carries colour identity and nothing else. 28 tokens: an 11-step `accent/*`
+ramp, a 13-step `neutral/*` ramp, `accent/contrast`, and the three filled-surface
+steps `accent/solid`, `accent/solid-hover` and `accent/solid-active`.
 
 | Niche | Accent | Neutral | `accent/solid` | White on it |
 |---|---|---|---|---|
@@ -277,10 +288,17 @@ surface**, so `text/accent`, `icon/accent` and `border/accent` alias it too. One
 token, two contrast problems solved.
 
 `accent/contrast` is the foreground on a solid accent fill. It is `gray/0` in every
-niche — the token stays so a future brand with a genuinely light accent can flip it.
+niche, and after the niche procedure in §5 it always will be: contrast is fixed by
+moving the fill deeper, never by darkening the label (§1.8). So the token is not a
+contrast switch. It is a point of indirection — `text/on-accent` and `icon/on-accent`
+alias it rather than `gray/0` directly, which is what a niche that deliberately
+steps outside §1.8 would need: an accent no fill depth can carry a white label on,
+such as a yellow or a lime. That niche is one alias here instead of an edit to
+Theme — and §1.8 gets rewritten along with it, because the rule that every solid
+fill carries a white label would no longer be true.
 
 Typefaces and corner radii used to live here. They now have their own dials — see
-§4.3 and §4.6.
+§4.5 and §4.6.
 
 ### 4.3 Theme — semantic colour (Light → Dark)
 
@@ -307,18 +325,19 @@ Typefaces and corner radii used to live here. They now have their own dials — 
 
 | Token | Light | Dark |
 |---|---|---|
-| `bg/accent` | accent/600 | accent/500 |
-| `bg/accent-hover` | accent/700 | accent/400 |
-| `bg/accent-active` | accent/800 | accent/300 |
+| `bg/accent` | accent/solid | accent/solid |
+| `bg/accent-hover` | accent/solid-hover | accent/solid-hover |
+| `bg/accent-active` | accent/solid-active | accent/solid-active |
 | `bg/accent-subtle` | accent/50 | accent/950 |
 | `bg/accent-subtle-hover` | accent/100 | accent/900 |
 | `bg/neutral` | neutral/100 | neutral/800 |
 | `bg/neutral-hover` | neutral/200 | neutral/700 |
 | `bg/neutral-active` | neutral/300 | neutral/600 |
 
-Note the direction flip: accent gets *darker* on hover in Light and *lighter* in
-Dark. Hover always means "more contrast against the page", which is the opposite
-numeric direction in each theme.
+Accent fills are identical in Light and Dark, and they step *deeper* on hover and
+active in both. The three `accent/solid*` steps are chosen per niche so a white
+label clears 4.5:1 (§1.8), and a lighter fill in Dark would break exactly that.
+An earlier version of the system flipped the direction per theme — see §11.
 
 **Status fills** — `bg/success` (emerald/700) `bg/warning` (amber/700)
 `bg/danger` (red/600) `bg/info` (blue/600), each with a `-subtle` tint; danger also
@@ -336,11 +355,13 @@ white label in both, and lightening them in Dark would drop below 4.5:1.
 | `text/disabled` | neutral/400 | neutral/600 | Disabled and loading labels |
 | `text/on-accent` | accent/contrast | accent/contrast | On a solid accent fill |
 | `text/on-solid` | gray/0 | gray/0 | On danger / info solids |
-| `text/on-success` | gray/950 | gray/950 | On an emerald solid |
-| `text/on-warning` | gray/950 | gray/950 | On an amber solid |
+| `text/on-success` | gray/0 | gray/0 | On an emerald solid |
+| `text/on-warning` | gray/0 | gray/0 | On an amber solid |
 | `text/on-inverse` | neutral/0 | neutral/900 | On `bg/inverse` |
-| `text/accent` | accent/600 | accent/400 | Links, emphasised text |
-| `text/success` `text/warning` `text/danger` `text/info` | 700 | 400 | Status copy |
+| `text/accent` | accent/solid | accent/400 | Links, emphasised text |
+| `text/accent-hover` | accent/solid-hover | accent/300 | Hovered link |
+| `text/success` `text/warning` `text/info` | 700 | 400 | Status copy |
+| `text/danger` | red/600 | red/400 | Status copy — the one Light value that is not a 700 |
 
 **Icon** — mirrors text: `icon/primary` `secondary` `tertiary` `disabled` `accent`
 `on-accent` `on-solid` `on-inverse` `success` `warning` `danger` `info`.
@@ -457,8 +478,9 @@ three shared `font/display`, `font/body`, `font/mono` families. Tracking tighten
 size grows: an optical correction, not decoration. `overline` is the only role that
 expects manual uppercasing.
 
-What varies per mode: **line-height** on body and label roles, **tracking** on
-display and heading roles, **weight** on display roles, and the **families**.
+What varies per mode: **tracking** on every role but `code-md` and `code-sm`,
+**line-height** on the body roles and `label-lg`, **weight** on the three display
+roles and on `heading-xl`, `heading-lg` and `heading-md`, and the **families**.
 
 ### 4.7 Elevation
 
@@ -517,16 +539,19 @@ permits.
 
 ## 5. Adding a new niche
 
-A niche is 25 aliases in one collection. Nothing else in the system changes.
+A niche is 28 aliases in one collection. Nothing else in the system changes.
 
 1. **Pick an accent hue and a neutral.** Accent from the primitive ramps; neutral
    from `gray` (cool), `slate` (corporate blue-grey) or `sand` (warm).
-2. **Check the contrast.** Compute white on `<hue>/600`. Below 4.5:1, set
-   `accent/contrast` to `gray/950` instead of `gray/0`. Bright hues — amber, orange,
-   emerald, cyan, lime — always fail; blues, indigos, violets and roses pass.
+2. **Pick the solid step by contrast.** Compute white on `<hue>/600`. At 4.5:1 or
+   better, that is your `accent/solid`. Below it, move one step deeper and measure
+   again — bright hues (amber, orange, emerald, cyan, teal) land on 700 where blues,
+   indigos and violets land on 600. The label never darkens; the fill moves (§1.8).
 3. **Add the mode** to `2. Brand`.
 4. **Fill the aliases**: `accent/50…950` → the hue ramp, `neutral/0…1000` → the
-   neutral ramp, `accent/contrast`.
+   neutral ramp, `accent/contrast`, and the three filled-surface steps
+   `accent/solid`, `accent/solid-hover` and `accent/solid-active` → the ramp step
+   chosen in step 2 and the two below it.
 5. **Add one card to the Brand sweep in Theme Lab.** That sweep is the acceptance
    test for the niche — if the card reads correctly, the niche is done.
 
@@ -620,6 +645,11 @@ modes pinned on it.
 Together they cover all 20 atoms. Five sweeps, one per dial, each with a row of
 Specimen A and a row of Specimen B:
 
+> **Known gap.** The two rows above name 18 atoms; Radio and Spinner are not among
+> them. Either they sit inside a specimen without being listed, or the coverage
+> claim is stale. Confirming it means reading the specimens' nested instances in
+> Figma, which has not been done. Until then, treat "all 20" as unverified.
+
 | Sweep | Cards per row | Holds constant |
 |---|---|---|
 | Brand | 8 | Light · Default · Soft · Studio |
@@ -710,3 +740,35 @@ which tweens *everything that changed at once* and cannot separate the fill from
 spinner — so the prototype necessarily animates the palette. The contract keeps the
 palette flip **instant** and animates only the spinner's opacity (`duration/base`,
 `easing/standard`). Read the prototype for character, never as the literal spec.
+
+---
+
+## 11. Superseded decisions
+
+Decisions that were genuinely made, then replaced. They are recorded rather than
+deleted for two reasons: the reasoning that replaced them is part of the system's
+argument, and anyone who remembers the old behaviour is owed an explanation instead
+of a silent edit.
+
+This is not §10. Section 10 describes Figma-renderer facts that were never part of
+the contract. This section describes decisions that *were* the contract and are not
+any more.
+
+### Accent fills flipped direction per theme
+
+**What it was.** `bg/accent` resolved to `accent/600` in Light and `accent/500` in
+Dark. Hover and active moved one step *darker* in Light and one step *lighter* in
+Dark, under the rule that hover always means "more contrast against the page" — the
+opposite numeric direction in each theme.
+
+**Why it went.** It contradicts the white-label rule (§1.8). Every solid fill in the
+system carries a white label, and white on `accent/500` or anything lighter does not
+clear 4.5:1 for the bright hues. The flip therefore produced an inaccessible hover
+state in Dark for exactly the niches that needed the deeper step most — orange,
+cyan, emerald, teal. Keeping one direction for both themes also removes a rule
+consumers had to remember per theme.
+
+**What replaced it.** `bg/accent`, `bg/accent-hover` and `bg/accent-active` alias
+`accent/solid`, `accent/solid-hover` and `accent/solid-active`, which are identical
+in Light and Dark and step deeper on interaction in both (§4.2, §4.3). The same
+holds for the solid status fills, which do not lighten in Dark either.
