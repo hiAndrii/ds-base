@@ -163,6 +163,14 @@ spinner 1.5px) and `opacity` (1) never vary by state, so they are not columns.
 one variant defined by its border rather than a fill, so an absent fill in those
 states is intentional — not a missing token.
 
+**Active differs from Default by fill alone — it carries no shadow.**
+`Elevation/XS` is a resting shadow (DESIGN-SYSTEM §4.7: inputs at rest, table
+headers), not a pressed one, and a pressed control does not rise. The Figma set
+had it on 13 of the 15 Active variants, skipping Primary/SM and Secondary/SM; the
+gap is what showed it had been inherited rather than decided. It was removed from
+all 13 rather than added to the remaining two, which is also what `Button.module.css`
+had already assumed: `:active` changes the background and nothing else.
+
 **The `bg/surface` fill Outline and Ghost carry in Focus is a Figma-renderer
 workaround, not part of the contract.** A spread-only shadow is not cast by a
 transparent node (LLM-GUIDE §13), so the ring needs a fill to exist; `bg/surface`
