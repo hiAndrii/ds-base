@@ -336,7 +336,7 @@
   --text-accent-hover: var(--b-accent-solid-hover);
   --text-success: var(--p-emerald-700);
   --text-warning: var(--p-amber-700);
-  --text-danger: var(--p-red-600);
+  --text-danger: var(--p-red-700);
   --text-info: var(--p-blue-700);
   --icon-primary: var(--b-neutral-900);
   --icon-secondary: var(--b-neutral-600);
@@ -369,6 +369,8 @@
   --effect-focus-ring: var(--b-accent-500);
   --text-on-success: var(--p-gray-0);
   --text-on-warning: var(--p-gray-0);
+  --bg-danger-subtle-hover: var(--p-red-50);
+  --bg-danger-subtle-active: var(--p-red-100);
   /* space: Default (default) */
   --space-0: var(--p-dimension-0);
   --space-2xs: var(--p-dimension-4);
@@ -824,7 +826,7 @@
   --text-accent-hover: var(--b-accent-solid-hover);
   --text-success: var(--p-emerald-700);
   --text-warning: var(--p-amber-700);
-  --text-danger: var(--p-red-600);
+  --text-danger: var(--p-red-700);
   --text-info: var(--p-blue-700);
   --icon-primary: var(--b-neutral-900);
   --icon-secondary: var(--b-neutral-600);
@@ -857,6 +859,8 @@
   --effect-focus-ring: var(--b-accent-500);
   --text-on-success: var(--p-gray-0);
   --text-on-warning: var(--p-gray-0);
+  --bg-danger-subtle-hover: var(--p-red-50);
+  --bg-danger-subtle-active: var(--p-red-100);
 }
 
 [data-theme="dark"] {
@@ -904,7 +908,7 @@
   --text-accent-hover: var(--b-accent-300);
   --text-success: var(--p-emerald-400);
   --text-warning: var(--p-amber-400);
-  --text-danger: var(--p-red-400);
+  --text-danger: var(--p-red-300);
   --text-info: var(--p-blue-400);
   --icon-primary: var(--b-neutral-50);
   --icon-secondary: var(--b-neutral-400);
@@ -937,6 +941,8 @@
   --effect-focus-ring: var(--b-accent-400);
   --text-on-success: var(--p-gray-0);
   --text-on-warning: var(--p-gray-0);
+  --bg-danger-subtle-hover: var(--p-red-950);
+  --bg-danger-subtle-active: var(--p-red-900);
 }
 
 [data-density="default"] {
