@@ -136,15 +136,15 @@ The correct choice is the default choice, and there is nothing to remember.
 |---|---|---|---|---|
 | 1 | `1. Primitives` | Value | 260 | `[]` — hidden everywhere |
 | 2 | `2. Brand` | Base, Healthcare, AI, Banking, E-commerce, Crypto, Education, Wellness | 28 | `[]` — reached through Theme |
-| 3 | `3. Theme` | Light, Dark | 77 | fill / text / stroke / effect |
+| 3 | `3. Theme` | Light, Dark | 79 | fill / text / stroke / effect |
 | 4 | `4. Space & Size` | Default, Compact, Comfortable | 48 | gap / width-height / stroke-float |
 | 5 | `5. Shape` | Soft, Crisp, Sharp, Rounded | 9 | corner-radius |
 | 6 | `6. Typography` | Studio, Editorial, Technical, Expressive | 79 | font-family / size / line-height / letter-spacing / font-style |
 | 7 | `7. Motion` | Value | 4 | `[]` — not node-bound |
 
-**505 variables across seven collections.** Nine effect styles (§4.7) carry the
+**507 variables across seven collections.** Nine effect styles (§4.7) carry the
 elevation and focus geometry; they are styles, not variables, and are counted
-separately everywhere. The compiler reports 514 because it emits both: 505 + 9.
+separately everywhere. The compiler reports 516 because it emits both: 507 + 9.
 
 Five of the seven are the dials of §1.1 — Brand, Theme, Space & Size, Shape and
 Typography — each switched from the Appearance panel. Primitives and Motion are
@@ -344,6 +344,47 @@ An earlier version of the system flipped the direction per theme — see §11.
 has `-hover` and `-active`. All four are identical in Light and Dark: they carry a
 white label in both, and lightening them in Dark would drop below 4.5:1.
 
+**Quiet danger surfaces** — a destructive control that is not a solid button is
+transparent at rest and tints on interaction, the way the neutral Outline and Ghost
+buttons do. That ladder is:
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `bg/danger-subtle` | red/50 | red/950 | Rest fill of a tinted container — badge, chip, callout |
+| `bg/danger-subtle-hover` | red/50 | red/950 | Hover fill of a control transparent at rest |
+| `bg/danger-subtle-active` | red/100 | red/900 | Pressed fill of the same control |
+
+`-hover` carries the same value as `bg/danger-subtle`, which is deliberate: a
+control that is transparent at rest has no tint to step away from, so its hover is
+the first tint, exactly as the neutral Ghost goes from nothing to `bg/surface-hover`.
+The roles are distinct even where the values coincide, as `bg/canvas` and
+`bg/surface` are both neutral/0 in Light.
+
+`text/danger` sits one ramp step deeper than the other status text roles — red/700
+in Light, red/300 in Dark — because it has to clear 4.5:1 on those tints, where the
+other three tones only ever carry text on their own `-subtle` rest fill. On
+`bg/danger-subtle` it measures 5.91:1 in Light and 8.51:1 in Dark; on
+`bg/danger-subtle-active`, 5.30:1 and 5.28:1.
+
+**This also repairs an existing failure.** Before this change `text/danger` was
+red/600, which measured **4.41:1** on `bg/danger-subtle` in Light — below AA. Every
+Badge and Chip with `Tone=Danger` and `Style=Subtle` was shipping text under the
+threshold. Moving the token fixes those components without touching them.
+
+**Known debt, recorded rather than fixed.**
+
+- **The tones are not symmetric.** After this change danger is the only tone with a
+  full `subtle` / `-subtle-hover` / `-subtle-active` set. Accent has `-subtle-hover`
+  but no `-subtle-active`; success, warning and info have only `-subtle`. Nothing
+  needs the missing steps yet, and adding them speculatively would be eight tokens
+  no component references.
+- **`text/accent` on accent tints fails AA for two niches.** Education measures
+  4.28:1 on `bg/accent-subtle` and 3.91:1 on `bg/accent-subtle-hover`; Banking
+  measures 4.24:1 on `bg/accent-subtle-hover`. It is the same defect this section
+  fixes for danger, in the accent ramp, for two of the eight brands. Fixing it means
+  either deepening `text/accent` per niche or lightening the tints, and it is a
+  brand-level decision rather than a token rename.
+
 **Text**
 
 | Token | Light | Dark | Use |
@@ -361,7 +402,7 @@ white label in both, and lightening them in Dark would drop below 4.5:1.
 | `text/accent` | accent/solid | accent/400 | Links, emphasised text |
 | `text/accent-hover` | accent/solid-hover | accent/300 | Hovered link |
 | `text/success` `text/warning` `text/info` | 700 | 400 | Status copy |
-| `text/danger` | red/600 | red/400 | Status copy — the one Light value that is not a 700 |
+| `text/danger` | red/700 | red/300 | Status copy — one step deeper than its siblings so it clears AA on the danger tints |
 
 **Icon** — mirrors text: `icon/primary` `secondary` `tertiary` `disabled` `accent`
 `on-accent` `on-solid` `on-inverse` `success` `warning` `danger` `info`.

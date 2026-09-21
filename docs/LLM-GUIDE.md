@@ -109,6 +109,7 @@ Work from the question, not from the palette.
 | A hovered row | `bg/surface-hover` |
 | A filled primary button | `bg/accent` + `text/on-accent` |
 | A quiet tinted chip or callout | `bg/accent-subtle` + `text/accent` |
+| A destructive control that is transparent at rest | `text/danger` + `border/danger`, tinting to `bg/danger-subtle-hover` on hover and `bg/danger-subtle-active` on press |
 | A secondary button fill | `bg/neutral` + `text/primary` |
 | Body copy | `text/primary` |
 | Supporting copy, captions | `text/secondary` |
