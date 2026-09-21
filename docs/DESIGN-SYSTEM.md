@@ -288,7 +288,14 @@ surface**, so `text/accent`, `icon/accent` and `border/accent` alias it too. One
 token, two contrast problems solved.
 
 `accent/contrast` is the foreground on a solid accent fill. It is `gray/0` in every
-niche — the token stays so a future brand with a genuinely light accent can flip it.
+niche, and after the niche procedure in §5 it always will be: contrast is fixed by
+moving the fill deeper, never by darkening the label (§1.8). So the token is not a
+contrast switch. It is a point of indirection — `text/on-accent` and `icon/on-accent`
+alias it rather than `gray/0` directly, which is what a niche that deliberately
+steps outside §1.8 would need: an accent no fill depth can carry a white label on,
+such as a yellow or a lime. That niche is one alias here instead of an edit to
+Theme — and §1.8 gets rewritten along with it, because the rule that every solid
+fill carries a white label would no longer be true.
 
 Typefaces and corner radii used to live here. They now have their own dials — see
 §4.5 and §4.6.
