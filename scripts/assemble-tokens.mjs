@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Assembles the seven slices in tokens/.raw/ into tokens/tokens.json.
+// Assembles the eight slices in tokens/.raw/ into tokens/tokens.json.
 // Pure Node, zero dependencies. Run with `npm run export`.
 //
 // Why this exists

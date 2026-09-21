@@ -241,9 +241,10 @@ await textNode.setTextStyleIdAsync(styles['Body/MD']);
 textNode.fills = [paint('text/primary')];
 ```
 
-Load the font before touching `characters`. Brand families are Geist, Plus Jakarta
-Sans, Manrope, IBM Plex Sans, Instrument Sans (styles `Regular`, `Medium`,
-`SemiBold`, `Bold`) and Geist Mono, JetBrains Mono.
+Load the font before touching `characters`. Typefaces live in `6. Typography`, not
+in Brand. The four modes resolve to exactly six families: Geist, Plus Jakarta Sans,
+IBM Plex Sans and Manrope for display and body (styles `Regular`, `Medium`,
+`SemiBold`, `Bold`), and Geist Mono and JetBrains Mono for code (`Regular`).
 
 ---
 
@@ -325,14 +326,15 @@ TOKENS
 
 ## 6. Adding a niche
 
-A niche is 25 aliases in `2. Brand`. Shape and typeface are separate dials and are
+A niche is 28 aliases in `2. Brand`. Shape and typeface are separate dials and are
 NOT part of a niche.
 
 1. Pick an accent hue and a neutral (`gray` cool / `slate` corporate / `sand` warm).
 2. Compute white-on-`<hue>/600`. Below 4.5:1 → `accent/contrast = gray/950`.
    Amber, orange, emerald, cyan and lime always fail. Blue, indigo, violet, rose pass.
 3. `brandCollection.addMode("<Niche>")`.
-4. Fill 25 aliases: `accent/50…950`, `neutral/0…1000`, `accent/contrast`.
+4. Fill 28 aliases: `accent/50…950`, `neutral/0…1000`, `accent/contrast`, and
+   `accent/solid`, `accent/solid-hover`, `accent/solid-active`.
 5. Add one card to the Brand sweep in Theme Lab. That sweep is the acceptance test.
 
 Nothing in Theme, Space & Size, Shape, Typography or any component changes.

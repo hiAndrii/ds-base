@@ -22,7 +22,7 @@ entirely to tokens, and every variation is a mode switch rather than a redraw.
 | Softer, friendlier corners | Shape → `Rounded` | seconds |
 | A different typographic voice | Typography → `Editorial` | seconds |
 | Dense analytics dashboard | Density → `Compact` | seconds |
-| A niche that does not exist yet | Add one Brand mode, fill 25 aliases | ~10 min |
+| A niche that does not exist yet | Add one Brand mode, fill 28 aliases | ~10 min |
 
 ---
 
@@ -75,9 +75,10 @@ it works.
 
 ## What ships in v1
 
-- **501 variables** across 6 collections
+- **505 variables** across 7 collections
 - **19 text styles**, every property bound to a variable
-- **9 effect styles** (elevation + focus), shadow colours theme-aware
+- **9 effect styles** (elevation + focus), shadow colours theme-aware — styles, not
+  variables, which is why the compiler reports 514 tokens: 505 + 9
 - **40 icons** on a 24px grid, 1.5px stroke
 - **20 atoms — the complete atomic layer** of the
   [ux-components taxonomy](https://www.ux-components.com/components/atomic):

@@ -10,7 +10,7 @@
 //   1. Set PART below to one slice.
 //   2. Run this whole file through `use_figma` against the design system file.
 //   3. Save the returned JSON to tokens/.raw/<PART>.json
-//   4. Repeat for all seven slices, then `npm run export`.
+//   4. Repeat for all eight slices, then `npm run export`.
 //
 // Why one slice at a time: `use_figma` truncates its result at roughly 20 KB
 // and the assembled graph is ~47 KB. Every individual slice fits comfortably.
