@@ -768,10 +768,14 @@ to trip:
   control carrying `Focus/Ring` has the flag on — Button's `State=Focus` variants,
   and the inner `Field` frame in Input, Textarea, Number Input and Color Picker.
 - **The node must have a fill.** A shadow is cast by opaque pixels, so a
-  transparent control casts none. Button's Outline and Ghost variants — the two with
-  no solid fill — take a `bg/surface` fill in Focus for exactly this reason; it
-  matches `bg/canvas` in Light, so the fill is invisible and exists only to cast the
-  ring.
+  transparent control casts none. Button's Outline and Ghost hierarchies — the two
+  with no solid fill — take a `bg/surface` fill in Focus for exactly this reason.
+  The fill is invisible in Light, where `bg/surface` and `bg/canvas` are both
+  neutral/0, **but visible in Dark on a page background**, where neutral/900 sits on
+  a neutral/950 canvas: a focused Outline or Ghost button shows a faintly lighter
+  plate. On a card it disappears again. Dropping the fill was measured rather than
+  assumed — the ring vanishes with it, whether the effect's *show shadow behind
+  transparent areas* flag is on or off, because nothing is left to cast it.
 
 **None of these three cross into CSS — they are Figma-renderer facts, not the
 contract.** `box-shadow` paints outside the box with no clip and no fill, so in code
@@ -813,3 +817,42 @@ consumers had to remember per theme.
 `accent/solid`, `accent/solid-hover` and `accent/solid-active`, which are identical
 in Light and Dark and step deeper on interaction in both (§4.2, §4.3). The same
 holds for the solid status fills, which do not lighten in Dark either.
+
+### Tone as a variable mode instead of a variant axis
+
+**What was considered.** Rather than crossing Button's `Hierarchy` with a `Tone`
+axis, put tone in its own variable collection with `Neutral` and `Danger` modes,
+bind the component to intermediate `tone/*` tokens, and switch tone by pinning a
+mode on the instance. It continues the logic of the five dials one level down, and
+it would have cut Button from 126 variants to 72.
+
+**It was prototyped, not argued about.** Eighteen `tone/*` tokens covered all four
+hierarchies, including the border asymmetry — `tone/border` and `tone/border-hover`
+resolve to `border/default` and `border/strong` in Neutral and both to
+`border/danger` in Danger, so the asymmetry lives in the data rather than in the
+component. A single focus-ring style with its colour bound to `tone/ring` switched
+between indigo and red with the mode, replacing two styles. Nested icons and the
+spinner inherited the mode correctly.
+
+**Why it was deferred for Button.**
+
+- **It ships a pair we decided against.** Modes cannot be restricted per variant, so
+  a danger Secondary exists whether or not anyone wants it — and it renders
+  identically to a danger Ghost under the cursor.
+- **Tone leaves the Properties panel.** A designer inspecting a button sees
+  `Hierarchy`, `Size` and `State`, and no tone at all; it moves to the mode picker,
+  which in this file belongs to the five document-level dials.
+- **It leaks through containers.** Pinning `Tone=Danger` on a card turns every
+  button inside it red, including ones that should stay neutral. The variant axis
+  states a button's tone on the button.
+- **The code loses a named prop.** `build-tokens.mjs` maps exactly five collections
+  to attributes; a sixth would compile to `[data-tone="danger"]`, so React would
+  carry a data attribute instead of a typed variant union, and the token name in Dev
+  Mode reads the same in both tones.
+
+**Where it still looks right: Badge.** Six tones × two styles × two sizes is 24
+variants for a component whose tone has no hover or press state, no invalid
+combination to forbid, and no container-inheritance hazard worth the name — modes
+would take it to four. Spinner and Progress are smaller versions of the same
+argument. That is a separate piece of work, and it would want its own decision about
+whether a component-token layer carries modes at all.

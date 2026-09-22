@@ -1,17 +1,19 @@
 /*
  * Button — styled entirely from semantic tokens (src/styles/tokens.css).
  *
- * The colour rules below are transcribed from the Variant × State table in
- * docs/ATOMS.md §Button. The Figma "State" axis is not modelled as data here:
- *   Default  → the base variant rule
+ * The colour rules below are transcribed from the Hierarchy × Tone × State table
+ * in docs/ATOMS.md §Button — the seven pairs that exist, and nothing else. The
+ * Figma "State" axis is not modelled as data here:
+ *   Default  → the base pair rule
  *   Hover    → :hover      Active → :active      Focus → :focus-visible
  *   Disabled → :disabled (also covers Loading, whose palette is identical)
  *
- * Two Figma-renderer workarounds from that table are deliberately NOT ported:
+ * Three things in the Figma file are deliberately NOT ported:
  *   - the bg/surface fill on Outline/Ghost Focus — box-shadow is cast without a
  *     fill, so both stay transparent under :focus-visible;
  *   - clipsContent — it must NOT become overflow: hidden, which would clip the
- *     focus ring, since box-shadow paints outside the element.
+ *     focus ring, since box-shadow paints outside the element;
+ *   - no shadow on :active — Active is a fill change and nothing else.
  */
 
 .button {
@@ -35,12 +37,13 @@
     color var(--duration-base) var(--easing-standard);
 }
 
-/* Focus — one declaration, painted outside the box. No fill, no clipping. */
+/* Focus — one declaration, painted outside the box. No fill, no clipping.
+ * The ring follows Tone, never Hierarchy. */
 .button:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
 }
-.destructive:focus-visible {
+.toneDanger:focus-visible {
   box-shadow: var(--focus-ring-danger);
 }
 
@@ -70,7 +73,8 @@
  * Motion spec (ATOMS §Spinner): rotate 360°, 1s, linear, infinite. */
 .spinner {
   box-sizing: border-box;
-  border: 2px solid var(--icon-disabled);
+  /* 1.5px, matching the Vector inside the Figma spinner instance. */
+  border: var(--border-width-medium) solid var(--icon-disabled);
   border-top-color: transparent;
   border-radius: var(--radius-full);
   /* Continuous rotation loop + a one-shot opacity fade-in as it replaces the
@@ -139,90 +143,122 @@
   height: var(--size-icon-lg);
 }
 
-/* ---- Variants: Default / Hover / Active per the Variant × State table. ---- */
+/* ---- The seven pairs: Default / Hover / Active per the palette table. ---- */
 
-/* Primary */
-.primary {
+/* Primary · Neutral */
+.primaryNeutral {
   background-color: var(--bg-accent);
   color: var(--text-on-accent);
 }
-.primary .icon {
+.primaryNeutral .icon {
   color: var(--icon-on-accent);
 }
-.primary:not(:disabled):hover {
+.primaryNeutral:not(:disabled):hover {
   background-color: var(--bg-accent-hover);
 }
-.primary:not(:disabled):active {
+.primaryNeutral:not(:disabled):active {
   background-color: var(--bg-accent-active);
 }
 
-/* Secondary */
-.secondary {
-  background-color: var(--bg-neutral);
-  color: var(--text-primary);
-}
-.secondary .icon {
-  color: var(--icon-secondary);
-}
-.secondary:not(:disabled):hover {
-  background-color: var(--bg-neutral-hover);
-}
-.secondary:not(:disabled):active {
-  background-color: var(--bg-neutral-active);
-}
-
-/* Outline — fill-less by design; defined by its border. */
-.outline {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-}
-.outline .icon {
-  color: var(--icon-secondary);
-}
-.outline:not(:disabled):hover {
-  background-color: var(--bg-surface-hover);
-  border-color: var(--border-strong);
-}
-.outline:not(:disabled):active {
-  background-color: var(--bg-surface-active);
-  border-color: var(--border-strong);
-}
-.outline:focus-visible {
-  border-color: var(--border-focus);
-}
-
-/* Ghost — fill-less by design; no border. */
-.ghost {
-  background-color: transparent;
-  color: var(--text-primary);
-}
-.ghost .icon {
-  color: var(--icon-secondary);
-}
-.ghost:not(:disabled):hover {
-  background-color: var(--bg-surface-hover);
-}
-.ghost:not(:disabled):active {
-  background-color: var(--bg-surface-active);
-}
-
-/* Destructive */
-.destructive {
+/* Primary · Danger — the solid red button; dialog confirmations only. */
+.primaryDanger {
   background-color: var(--bg-danger);
   color: var(--text-on-solid);
 }
-.destructive .icon {
+.primaryDanger .icon {
   color: var(--icon-on-solid);
 }
-.destructive:not(:disabled):hover {
+.primaryDanger:not(:disabled):hover {
   background-color: var(--bg-danger-hover);
 }
-.destructive:not(:disabled):active {
+.primaryDanger:not(:disabled):active {
   background-color: var(--bg-danger-active);
 }
 
-/* ---- Disabled / Loading palette (last, so it wins on ties). ------------- */
+/* Secondary · Neutral — there is no Secondary · Danger, by decision. */
+.secondaryNeutral {
+  background-color: var(--bg-neutral);
+  color: var(--text-primary);
+}
+.secondaryNeutral .icon {
+  color: var(--icon-secondary);
+}
+.secondaryNeutral:not(:disabled):hover {
+  background-color: var(--bg-neutral-hover);
+}
+.secondaryNeutral:not(:disabled):active {
+  background-color: var(--bg-neutral-active);
+}
+
+/* Outline · Neutral — fill-less by design; defined by its border. */
+.outlineNeutral {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: var(--border-width-thin) solid var(--border-default);
+}
+.outlineNeutral .icon {
+  color: var(--icon-secondary);
+}
+.outlineNeutral:not(:disabled):hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+}
+.outlineNeutral:not(:disabled):active {
+  background-color: var(--bg-surface-active);
+  border-color: var(--border-strong);
+}
+.outlineNeutral:focus-visible {
+  border-color: var(--border-focus);
+}
+
+/* Outline · Danger — the border holds one colour; the tint carries the state. */
+.outlineDanger {
+  background-color: transparent;
+  color: var(--text-danger);
+  border: var(--border-width-thin) solid var(--border-danger);
+}
+.outlineDanger .icon {
+  color: var(--icon-danger);
+}
+.outlineDanger:not(:disabled):hover {
+  background-color: var(--bg-danger-subtle-hover);
+}
+.outlineDanger:not(:disabled):active {
+  background-color: var(--bg-danger-subtle-active);
+}
+
+/* Ghost · Neutral — fill-less by design; no border. */
+.ghostNeutral {
+  background-color: transparent;
+  color: var(--text-primary);
+}
+.ghostNeutral .icon {
+  color: var(--icon-secondary);
+}
+.ghostNeutral:not(:disabled):hover {
+  background-color: var(--bg-surface-hover);
+}
+.ghostNeutral:not(:disabled):active {
+  background-color: var(--bg-surface-active);
+}
+
+/* Ghost · Danger */
+.ghostDanger {
+  background-color: transparent;
+  color: var(--text-danger);
+}
+.ghostDanger .icon {
+  color: var(--icon-danger);
+}
+.ghostDanger:not(:disabled):hover {
+  background-color: var(--bg-danger-subtle-hover);
+}
+.ghostDanger:not(:disabled):active {
+  background-color: var(--bg-danger-subtle-active);
+}
+
+/* ---- Disabled / Loading palette (last, so it wins on ties). -------------
+ * Tone-invariant: an unavailable control is not a dangerous one. */
 
 .button:disabled {
   color: var(--text-disabled);
@@ -230,15 +266,17 @@
 .button:disabled .icon {
   color: var(--icon-disabled);
 }
-.primary:disabled,
-.secondary:disabled,
-.destructive:disabled {
+.primaryNeutral:disabled,
+.primaryDanger:disabled,
+.secondaryNeutral:disabled {
   background-color: var(--bg-disabled);
 }
-.outline:disabled {
+.outlineNeutral:disabled,
+.outlineDanger:disabled {
   background-color: transparent;
   border-color: var(--border-disabled);
 }
-.ghost:disabled {
+.ghostNeutral:disabled,
+.ghostDanger:disabled {
   background-color: transparent;
 }

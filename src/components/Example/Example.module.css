@@ -13,5 +13,5 @@
   color: var(--text-primary);
   padding: var(--space-md);
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-default);
+  border: var(--border-width-thin) solid var(--border-default);
 }

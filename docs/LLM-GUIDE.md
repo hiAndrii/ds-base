@@ -86,6 +86,21 @@ literally. They are ordered by how often violating them causes damage.
     through `INSTANCE` children, and read the colour off the leaf `Vector`
     (fill or stroke), not off the instance. When a read disagrees with what the
     Figma UI shows, suspect the reader before the data.
+19a. **Test rendering on plain frames, never on instances.** An instance inherits
+    every property it does not override, so a later edit to the main component
+    silently rewrites what you thought you were testing — `fills = []` set on an
+    instance reads back as the main component's fill once that fill changes. A
+    comparison built from instances can therefore be invalid by the time you
+    screenshot it. Build probes with `figma.createFrame()`, and read the state
+    back off the node before trusting any screenshot: a screenshot records the
+    moment, the read records the file.
+19b. **`setBoundVariableForPaint` silently drops paint opacity.** Pass
+    `{ type: 'SOLID', color, opacity: 0.01 }` into it and the returned paint comes
+    back at opacity 1, with no error. Bind first, then clone the paint and set the
+    opacity on the copy:
+    `node.fills = [figma.variables.setBoundVariableForPaint(paint, 'color', v)]`
+    followed by `node.fills = node.fills.map(f => ({ ...f, opacity: 0.01 }))`.
+    Read it back — the difference is invisible on canvas until it matters.
 20. **Motion comes from tokens, never literals.** Durations and easing live in
     `7. Motion` and compile to `--duration-*` / `--easing-*`. Write
     `transition: background-color var(--duration-base) var(--easing-standard)`, never

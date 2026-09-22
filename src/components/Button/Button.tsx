@@ -2,19 +2,13 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import styles from './Button.module.css';
 
-export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'outline'
-  | 'ghost'
-  | 'destructive';
+export type ButtonHierarchy = 'primary' | 'secondary' | 'outline' | 'ghost';
+
+export type ButtonTone = 'neutral' | 'danger';
 
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
-export interface ButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement> {
-  /** Visual variant. Maps to the Variant axis in Figma. */
-  variant?: ButtonVariant;
+interface ButtonOwnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Control height and type scale. Maps to the Size axis in Figma. */
   size?: ButtonSize;
   /**
@@ -29,13 +23,30 @@ export interface ButtonProps
   iconRight?: ReactNode;
 }
 
-const variantClass: Record<ButtonVariant, string> = {
-  primary: styles.primary,
-  secondary: styles.secondary,
-  outline: styles.outline,
-  ghost: styles.ghost,
-  destructive: styles.destructive,
-};
+/**
+ * Hierarchy and tone are independent everywhere except Secondary, which ships
+ * Neutral only: a danger Secondary would render identically to a hovered danger
+ * Ghost (ATOMS §Button). The union makes that pair a type error rather than a
+ * silently unstyled button.
+ */
+type HierarchyAndTone =
+  | { hierarchy?: 'primary' | 'outline' | 'ghost'; tone?: ButtonTone }
+  | { hierarchy: 'secondary'; tone?: 'neutral' };
+
+export type ButtonProps = ButtonOwnProps & HierarchyAndTone;
+
+/** The seven pairs that exist. Keys mirror the ATOMS §Button palette rows. */
+const pairClass = {
+  'primary-neutral': styles.primaryNeutral,
+  'primary-danger': styles.primaryDanger,
+  'secondary-neutral': styles.secondaryNeutral,
+  'outline-neutral': styles.outlineNeutral,
+  'outline-danger': styles.outlineDanger,
+  'ghost-neutral': styles.ghostNeutral,
+  'ghost-danger': styles.ghostDanger,
+} as const;
+
+type ButtonPair = keyof typeof pairClass;
 
 const sizeClass: Record<ButtonSize, string> = {
   sm: styles.sm,
@@ -49,14 +60,18 @@ const sizeClass: Record<ButtonSize, string> = {
  * The Figma `State` axis is not part of this API: Hover / Active / Focus are the
  * browser's `:hover` / `:active` / `:focus-visible`, Default is the absence of a
  * state, and only Disabled and Loading are props. Colour comes from the
- * Variant × State table in docs/ATOMS.md §Button. Figma's focus-ring renderer
- * workarounds (the `bg/surface` fill on Outline/Ghost Focus, `clipsContent`) are
- * deliberately not reproduced — `box-shadow` paints outside the box with no fill.
+ * Hierarchy × Tone × State table in docs/ATOMS.md §Button. Figma's focus-ring
+ * renderer workarounds (the `bg/surface` fill on Outline/Ghost Focus,
+ * `clipsContent`) are deliberately not reproduced — `box-shadow` paints outside
+ * the box with no fill — and neither is the shadow Active used to carry.
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  function Button(
-    {
-      variant = 'primary',
+  function Button(props, ref) {
+    // The props type is a union, so it is narrowed to its widest member here.
+    // TypeScript has already rejected secondary + danger at the call site.
+    const {
+      hierarchy = 'primary',
+      tone = 'neutral',
       size = 'md',
       loading = false,
       disabled = false,
@@ -66,12 +81,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       className,
       children,
       ...rest
-    },
-    ref,
-  ) {
+    } = props as ButtonOwnProps & {
+      hierarchy?: ButtonHierarchy;
+      tone?: ButtonTone;
+    };
+
+    // A JavaScript caller can still reach secondary + danger. Keep the tone —
+    // a destructive action must not quietly lose its colour — and fall back to
+    // the solid danger button, which is what picking Tone=Danger on Secondary
+    // resolves to in Figma as well.
+    const pair = `${hierarchy}-${tone}` as ButtonPair;
+    const paletteClass = pairClass[pair] ?? pairClass['primary-danger'];
+
     const classes = [
       styles.button,
-      variantClass[variant],
+      paletteClass,
+      // The focus ring follows tone, never hierarchy (ATOMS §Button).
+      tone === 'danger' && styles.toneDanger,
       sizeClass[size],
       className,
     ]
