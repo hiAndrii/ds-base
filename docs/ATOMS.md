@@ -60,6 +60,12 @@ Ghost being hovered — a button at rest that looks like a different button unde
 cursor. The combination is left out until a use case argues for it; adding it later
 costs 18 variants and changes nothing else.
 
+In Figma, picking `Tone=Danger` on `Hierarchy=Secondary` switches the instance to
+Primary Danger, because Figma falls back to the first variant that exists on the
+axis — that is not a bug, the pair is deliberately absent. In code the same
+combination is a TypeScript error. For a destructive action of middling weight,
+reach for Outline Danger.
+
 **MD is the default.** Figma takes the top-left variant of a set as its default, so
 the set is laid out with the MD row first and new instances land on MD, matching the
 `md` default in `Button.module.css`. The demo frame beside the set reads

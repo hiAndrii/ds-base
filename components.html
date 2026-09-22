@@ -200,14 +200,25 @@
     <script type="module">
         // react / react-dom are the library's external peers — the Vite dev
         // server resolves them from local node_modules (offline, no CDN).
-        import { createElement as h, Fragment } from 'react';
+        import { createElement as h, Fragment, useState } from 'react';
         import { createRoot } from 'react-dom/client';
         // The library's built entry. This is the same file package.json maps the
         // "ds-base" export to (exports "." → ./dist/index.js) — dist, never src.
         import { Button } from './dist/index.js';
 
-        const VARIANTS = ['primary', 'secondary', 'outline', 'ghost', 'destructive'];
+        // The seven pairs that exist. Secondary is Neutral only — a danger
+        // Secondary is a TypeScript error, so it is absent here too.
+        const PAIRS = [
+            ['primary', 'neutral'],
+            ['primary', 'danger'],
+            ['secondary', 'neutral'],
+            ['outline', 'neutral'],
+            ['outline', 'danger'],
+            ['ghost', 'neutral'],
+            ['ghost', 'danger'],
+        ];
         const SIZES = ['sm', 'md', 'lg'];
+        const cap = (s) => s[0].toUpperCase() + s.slice(1);
 
         // Minimal inline icons (stroke = currentColor, so the icon token applies).
         const icon = (d) => h('svg', {
@@ -223,11 +234,11 @@
                 h('span', { className: 'row-label' }, label),
                 cluster(nodes));
 
-        // One button per variant, with shared extra props.
-        const perVariant = (size, extra = {}) =>
-            VARIANTS.map((variant) =>
-                h(Button, { key: variant, variant, size, ...extra },
-                    variant[0].toUpperCase() + variant.slice(1)));
+        // One button per existing hierarchy × tone pair, with shared extra props.
+        const perPair = (size, extra = {}) =>
+            PAIRS.map(([hierarchy, tone]) =>
+                h(Button, { key: hierarchy + '-' + tone, hierarchy, tone, size, ...extra },
+                    tone === 'danger' ? cap(hierarchy) + ' danger' : cap(hierarchy)));
 
         const section = (title, lede, rows) =>
             h('section', null,
@@ -235,20 +246,52 @@
                 h('p', { className: 'section-lede' }, lede),
                 ...rows);
 
+        // Two selects instead of one: hierarchy and tone are separate questions.
+        // Danger is disabled for Secondary — the pair does not exist, and in
+        // TypeScript it is a compile error rather than an unstyled button.
+        function Playground() {
+            const [hierarchy, setHierarchy] = useState('primary');
+            const [tone, setTone] = useState('neutral');
+            const secondaryDanger = hierarchy === 'secondary';
+            const effectiveTone = secondaryDanger ? 'neutral' : tone;
+            const select = (label, value, options, onChange, isDisabled) =>
+                h('label', { className: 'dial' },
+                    h('span', null, label),
+                    h('select', {
+                        value,
+                        onChange: (e) => onChange(e.target.value),
+                    }, options.map((o) =>
+                        h('option', { key: o, value: o, disabled: isDisabled ? isDisabled(o) : false },
+                            cap(o)))));
+            return h('div', { className: 'row' },
+                h('span', { className: 'row-label' }, 'props'),
+                h('div', { className: 'cluster' },
+                    select('Hierarchy', hierarchy, ['primary', 'secondary', 'outline', 'ghost'], setHierarchy),
+                    select('Tone', effectiveTone, ['neutral', 'danger'], setTone,
+                        (o) => o === 'danger' && secondaryDanger),
+                    h(Button, { hierarchy, tone: effectiveTone },
+                        cap(hierarchy) + ' · ' + cap(effectiveTone))));
+        }
+
         const app = h(Fragment, null,
             section(
-                'Variants × sizes',
-                'The five variants at every size. Hover, press and Tab to a button to see the state transitions and the focus ring.',
-                SIZES.map((size) => row(size.toUpperCase(), perVariant(size))),
+                'Playground',
+                'Pick a hierarchy and a tone. Danger is greyed out for Secondary because that pair does not exist — the same rule the type system enforces.',
+                [h(Playground, { key: 'playground' })],
+            ),
+            section(
+                'Hierarchy × tone × sizes',
+                'The seven pairs at every size — Secondary is Neutral only. Hover, press and Tab to a button: the focus ring follows the tone, so a danger button rings red whatever its hierarchy.',
+                SIZES.map((size) => row(size.toUpperCase(), perPair(size))),
             ),
             section(
                 'Content & state',
-                'Icon slots take any ReactNode; loading and disabled are the only stateful props. All at size MD.',
+                'Icon slots take any ReactNode; loading and disabled are the only stateful props. Disabled and Loading are tone-invariant — both tones land on the same palette. All at size MD.',
                 [
-                    row('iconLeft', perVariant('md', { iconLeft: Plus })),
-                    row('iconRight', perVariant('md', { iconRight: ArrowRight })),
-                    row('loading', perVariant('md', { loading: true })),
-                    row('disabled', perVariant('md', { disabled: true })),
+                    row('iconLeft', perPair('md', { iconLeft: Plus })),
+                    row('iconRight', perPair('md', { iconRight: ArrowRight })),
+                    row('loading', perPair('md', { loading: true })),
+                    row('disabled', perPair('md', { disabled: true })),
                 ],
             ),
         );
