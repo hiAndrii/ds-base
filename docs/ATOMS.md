@@ -37,15 +37,33 @@ will read as a foreign object next to the rest.
 
 ---
 
-## Button — 90 variants
+## Button — 126 variants
 
 The primary mechanism for user-initiated actions.
 
 | Axis | Values |
 |---|---|
-| `Variant` | Primary · Secondary · Outline · Ghost · Destructive |
-| `Size` | SM (32) · MD (40) · LG (48) |
+| `Hierarchy` | Primary · Secondary · Outline · Ghost |
+| `Tone` | Neutral · Danger |
+| `Size` | MD (40) · SM (32) · LG (48) |
 | `State` | Default · Hover · Focus · Active · Disabled · Loading |
+
+**Hierarchy and Tone are separate questions.** Hierarchy is how loud the button is;
+Tone is whether the action is destructive. The old `Destructive` value conflated
+the two, so a destructive action could only ever be a filled button — there was no
+way to put a Delete in a table row or a menu without shouting. `Destructive` is now
+`Hierarchy=Primary, Tone=Danger`.
+
+**Seven pairs, not eight.** Secondary ships Neutral only. A danger Secondary would
+land on `bg/danger-subtle` with `text/danger`, which is pixel-identical to a danger
+Ghost being hovered — a button at rest that looks like a different button under the
+cursor. The combination is left out until a use case argues for it; adding it later
+costs 18 variants and changes nothing else.
+
+**MD is the default.** Figma takes the top-left variant of a set as its default, so
+the set is laid out with the MD row first and new instances land on MD, matching the
+`md` default in `Button.module.css`. The demo frame beside the set reads
+SM → MD → LG, which is the order to think in, not the order the set is stored in.
 
 **Properties:** `Label` (text) · `Show icon left` (bool) · `Icon left` (swap) ·
 `Show icon right` (bool) · `Icon right` (swap)
@@ -88,10 +106,10 @@ own radius and tracks its width with no constraints to maintain.
 
 Two things make it render, and both are non-obvious. The `State=Focus` variants
 set `clipsContent = true` — a spread-only shadow is not painted without it. And
-Outline and Ghost — the two variants with no solid fill of their own — take a
+Outline and Ghost — the two hierarchies with no solid fill of their own — take a
 `bg/surface` fill in Focus, because a shadow is cast by a fill and a transparent
-button casts none. The colour matches `bg/canvas` in Light, so the fill is
-invisible on the page; it exists only so the ring is drawn. See DESIGN-SYSTEM §10.
+button casts none. That fill is invisible in Light and faintly visible in Dark on a
+page background; see the note under the palette and DESIGN-SYSTEM §10.
 
 The label sits in its own 2px auto-layout wrapper. That single wrapper pushes the
 text off the button's outer edge by the amount an icon box already carries as
@@ -111,53 +129,76 @@ and the icon's own ~2px inset are counted. Do not "fix" it to 8.
 
 **State palette**
 
-Colour is a function of `Variant` × `State`; `Size` never changes it. Every column
-is read from the component's real variable bindings, including nodes hidden by
-default — the icon colour lives on the icon instance's child `Vector`, not the
-instance, and is only visible to a reader that descends into hidden nested
-instances (see LLM-GUIDE §19). `—` means no bound paint: the node is transparent,
-carries no stroke, or (Effect) has no effect style.
+Colour is a function of `Hierarchy` × `Tone` × `State`; `Size` never changes it —
+verified across all 126 variants, not assumed. Every column is read from the
+component's real variable bindings, including nodes hidden by default: the icon
+colour lives on the icon instance's child `Vector`, not on the instance, and is
+only visible to a reader that descends into hidden nested instances (see
+LLM-GUIDE §19). `—` means no bound paint: the node is transparent, carries no
+stroke, or (Effect) has no effect style.
 
-| Variant | State | Fill | Text | Icon | Stroke | Effect |
-|---|---|---|---|---|---|---|
-| Primary | Default | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | — |
-| Primary | Hover | `bg/accent-hover` | `text/on-accent` | `icon/on-accent` | — | — |
-| Primary | Active | `bg/accent-active` | `text/on-accent` | `icon/on-accent` | — | — |
-| Primary | Focus | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | `Focus/Ring` |
-| Primary | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
-| Primary | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
-| Secondary | Default | `bg/neutral` | `text/primary` | `icon/secondary` | — | — |
-| Secondary | Hover | `bg/neutral-hover` | `text/primary` | `icon/secondary` | — | — |
-| Secondary | Active | `bg/neutral-active` | `text/primary` | `icon/secondary` | — | — |
-| Secondary | Focus | `bg/neutral` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
-| Secondary | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
-| Secondary | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
-| Outline | Default | — | `text/primary` | `icon/secondary` | `border/default` | — |
-| Outline | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | `border/strong` | — |
-| Outline | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | `border/strong` | — |
-| Outline | Focus | `bg/surface` | `text/primary` | `icon/secondary` | `border/focus` | `Focus/Ring` |
-| Outline | Disabled | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
-| Outline | Loading | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
-| Ghost | Default | — | `text/primary` | `icon/secondary` | — | — |
-| Ghost | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | — | — |
-| Ghost | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | — | — |
-| Ghost | Focus | `bg/surface` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
-| Ghost | Disabled | — | `text/disabled` | `icon/disabled` | — | — |
-| Ghost | Loading | — | `text/disabled` | `icon/disabled` | — | — |
-| Destructive | Default | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | — |
-| Destructive | Hover | `bg/danger-hover` | `text/on-solid` | `icon/on-solid` | — | — |
-| Destructive | Active | `bg/danger-active` | `text/on-solid` | `icon/on-solid` | — | — |
-| Destructive | Focus | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | `Focus/Ring Danger` |
-| Destructive | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
-| Destructive | Loading | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Hierarchy | Tone | State | Fill | Text | Icon | Stroke | Effect |
+|---|---|---|---|---|---|---|---|
+| Primary | Neutral | Default | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Neutral | Hover | `bg/accent-hover` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Neutral | Focus | `bg/accent` | `text/on-accent` | `icon/on-accent` | — | `Focus/Ring` |
+| Primary | Neutral | Active | `bg/accent-active` | `text/on-accent` | `icon/on-accent` | — | — |
+| Primary | Neutral | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Primary | Neutral | Loading | `bg/disabled` | `text/disabled` | `icon/on-accent` | — | — |
+| Primary | Danger | Default | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | — |
+| Primary | Danger | Hover | `bg/danger-hover` | `text/on-solid` | `icon/on-solid` | — | — |
+| Primary | Danger | Focus | `bg/danger` | `text/on-solid` | `icon/on-solid` | — | `Focus/Ring Danger` |
+| Primary | Danger | Active | `bg/danger-active` | `text/on-solid` | `icon/on-solid` | — | — |
+| Primary | Danger | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Primary | Danger | Loading | `bg/disabled` | `text/disabled` | `icon/on-solid` | — | — |
+| Secondary | Neutral | Default | `bg/neutral` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Neutral | Hover | `bg/neutral-hover` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Neutral | Focus | `bg/neutral` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
+| Secondary | Neutral | Active | `bg/neutral-active` | `text/primary` | `icon/secondary` | — | — |
+| Secondary | Neutral | Disabled | `bg/disabled` | `text/disabled` | `icon/disabled` | — | — |
+| Secondary | Neutral | Loading | `bg/disabled` | `text/disabled` | `icon/secondary` | — | — |
+| Outline | Neutral | Default | — | `text/primary` | `icon/secondary` | `border/default` | — |
+| Outline | Neutral | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | `border/strong` | — |
+| Outline | Neutral | Focus | `bg/surface` | `text/primary` | `icon/secondary` | `border/focus` | `Focus/Ring` |
+| Outline | Neutral | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | `border/strong` | — |
+| Outline | Neutral | Disabled | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
+| Outline | Neutral | Loading | — | `text/disabled` | `icon/secondary` | `border/disabled` | — |
+| Outline | Danger | Default | — | `text/danger` | `icon/danger` | `border/danger` | — |
+| Outline | Danger | Hover | `bg/danger-subtle-hover` | `text/danger` | `icon/danger` | `border/danger` | — |
+| Outline | Danger | Focus | `bg/surface` | `text/danger` | `icon/danger` | `border/danger` | `Focus/Ring Danger` |
+| Outline | Danger | Active | `bg/danger-subtle-active` | `text/danger` | `icon/danger` | `border/danger` | — |
+| Outline | Danger | Disabled | — | `text/disabled` | `icon/disabled` | `border/disabled` | — |
+| Outline | Danger | Loading | — | `text/disabled` | `icon/danger` | `border/disabled` | — |
+| Ghost | Neutral | Default | — | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Neutral | Hover | `bg/surface-hover` | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Neutral | Focus | `bg/surface` | `text/primary` | `icon/secondary` | — | `Focus/Ring` |
+| Ghost | Neutral | Active | `bg/surface-active` | `text/primary` | `icon/secondary` | — | — |
+| Ghost | Neutral | Disabled | — | `text/disabled` | `icon/disabled` | — | — |
+| Ghost | Neutral | Loading | — | `text/disabled` | `icon/secondary` | — | — |
+| Ghost | Danger | Default | — | `text/danger` | `icon/danger` | — | — |
+| Ghost | Danger | Hover | `bg/danger-subtle-hover` | `text/danger` | `icon/danger` | — | — |
+| Ghost | Danger | Focus | `bg/surface` | `text/danger` | `icon/danger` | — | `Focus/Ring Danger` |
+| Ghost | Danger | Active | `bg/danger-subtle-active` | `text/danger` | `icon/danger` | — | — |
+| Ghost | Danger | Disabled | — | `text/disabled` | `icon/disabled` | — | — |
+| Ghost | Danger | Loading | — | `text/disabled` | `icon/danger` | — | — |
 
 The **Icon** column is the colour bound on both the left and right icon slots (they
-always match). **Spinner:** the structural spinner is bound to `icon/disabled` and
-is shown only in Loading, where it replaces the left icon slot; the label stays on
-the row's `text/disabled`. **Effect** carries the focus ring, and every
-`State=Focus` row also sets `clipsContent = true` — both are Figma-renderer
-concerns; neither is reproduced in CSS (see below). `strokeWeight` (Outline 1px,
-spinner 1.5px) and `opacity` (1) never vary by state, so they are not columns.
+always match). **In Loading the icon slots keep their tone colour** rather than
+switching to `icon/disabled`: the slots are hidden in that state, so what the user
+sees is the spinner, which is bound to `icon/disabled` on every row. The label sits
+on the row's `text/disabled`.
+
+**Disabled and Loading are tone-invariant.** Both tones resolve to the same
+disabled palette, so 14 rows above duplicate 14 others. That is deliberate: a
+control that cannot be pressed is not dangerous, it is unavailable, and colouring it
+red would say two things at once (LLM-GUIDE §14). The duplication is the cost of a
+complete axis, not an oversight to optimise away.
+
+**The focus ring follows Tone, not Hierarchy.** `Focus/Ring` on Neutral,
+`Focus/Ring Danger` on Danger, in all four hierarchies. Every `State=Focus` variant
+also sets `clipsContent = true` — a Figma-renderer requirement, not part of the
+contract. `strokeWeight` (Outline 1px, spinner 1.5px) and `opacity` (1) never vary
+by state, so they are not columns.
 
 **Outline carries no fill in Default, Disabled and Loading by design.** It is the
 one variant defined by its border rather than a fill, so an absent fill in those
@@ -173,19 +214,34 @@ had already assumed: `:active` changes the background and nothing else.
 
 **The `bg/surface` fill Outline and Ghost carry in Focus is a Figma-renderer
 workaround, not part of the contract.** A spread-only shadow is not cast by a
-transparent node (LLM-GUIDE §13), so the ring needs a fill to exist; `bg/surface`
-matches `bg/canvas` in Light and is invisible on the page. It is **not reproduced
-in CSS** — `box-shadow` paints without any fill — so in code both variants stay
-transparent under `:focus-visible`.
+transparent node (LLM-GUIDE §13), so the ring needs a fill to exist. It is **not
+reproduced in CSS** — `box-shadow` paints without any fill — so in code both
+variants stay transparent under `:focus-visible`.
 
-**When to use which variant**
+**That fill is not invisible everywhere, and the docs used to claim it was.** It
+matches `bg/canvas` only in Light, where both resolve to neutral/0. In Dark
+`bg/surface` is neutral/900 against a neutral/950 canvas, so a focused Outline or
+Ghost button shows a faintly lighter plate for as long as it holds focus. On a card
+(`bg/surface`) it disappears again, in either theme. Removing the fill was tested
+and removes the ring with it, in both states of the effect's *show shadow behind
+transparent areas* flag — with nothing to cast it, there is no ring at all. The
+plate is the price of the ring in Figma, and it costs nothing in code.
 
-- **Primary** — the single most important action on the surface. One per decision group.
-- **Secondary** — supporting actions sitting beside a primary.
-- **Outline** — standalone actions on a busy or coloured surface where a filled
-  button would shout.
-- **Ghost** — low-emphasis actions inside toolbars, cards, table rows.
-- **Destructive** — irreversible actions. Always behind a confirmation.
+**When to use which pair**
+
+- **Primary · Neutral** — the single most important action on the surface. One per
+  decision group.
+- **Secondary · Neutral** — supporting actions sitting beside a primary.
+- **Outline · Neutral** — standalone actions on a busy or coloured surface where a
+  filled button would shout.
+- **Ghost · Neutral** — low-emphasis actions inside toolbars, cards, table rows.
+- **Tone=Danger** — destructive actions. **In an ordinary flow reach for Outline or
+  Ghost**: a Delete in a table row, a Remove in a menu, a Revoke beside a list item.
+  These read as destructive without dominating a screen they do not own.
+- **Primary · Danger** — the solid red button. Use it **only to confirm inside a
+  dialog**, where the destructive action is the whole point of the surface and the
+  user has already been asked. A solid danger button in a normal layout trains
+  people to ignore it.
 
 **Do not**
 
