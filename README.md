@@ -77,10 +77,10 @@ it works.
 
 ## What ships in v1
 
-- **507 variables** across 7 collections
+- **509 variables** across 7 collections
 - **19 text styles**, every property bound to a variable
 - **9 effect styles** (elevation + focus), shadow colours theme-aware — styles, not
-  variables, which is why the compiler reports 516 tokens: 507 + 9
+  variables, which is why the compiler reports 518 tokens: 509 + 9
 - **20 atoms plus an icon set of 40 — the complete atomic layer** of the
   [ux-components taxonomy](https://www.ux-components.com/components/atomic):
   Avatar, Badge, Button, Checkbox, Chip, Color Picker, Image, Input, Label,

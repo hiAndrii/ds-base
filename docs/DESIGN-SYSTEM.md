@@ -138,13 +138,13 @@ The correct choice is the default choice, and there is nothing to remember.
 | 2 | `2. Brand` | Base, Healthcare, AI, Banking, E-commerce, Crypto, Education, Wellness | 28 | `[]` — reached through Theme |
 | 3 | `3. Theme` | Light, Dark | 79 | fill / text / stroke / effect |
 | 4 | `4. Space & Size` | Default, Compact, Comfortable | 48 | gap / width-height / stroke-float |
-| 5 | `5. Shape` | Soft, Crisp, Sharp, Rounded | 9 | corner-radius |
+| 5 | `5. Shape` | Soft, Crisp, Sharp, Rounded | 11 | corner-radius |
 | 6 | `6. Typography` | Studio, Editorial, Technical, Expressive | 79 | font-family / size / line-height / letter-spacing / font-style |
 | 7 | `7. Motion` | Value | 4 | `[]` — not node-bound |
 
-**507 variables across seven collections.** Nine effect styles (§4.7) carry the
+**509 variables across seven collections.** Nine effect styles (§4.7) carry the
 elevation and focus geometry; they are styles, not variables, and are counted
-separately everywhere. The compiler reports 516 because it emits both: 507 + 9.
+separately everywhere. The compiler reports 518 because it emits both: 509 + 9.
 
 Five of the seven are the dials of §1.1 — Brand, Theme, Space & Size, Shape and
 Typography — each switched from the Appearance panel. Primitives and Motion are
@@ -455,8 +455,9 @@ scale. It is a literal 2px, and the only value in the system allowed to sit off 
 
 ### 4.5 Shape — the roundness dial
 
-Nine radius tokens, four modes. Every value is a multiple of 4; `full` (9999) is the
-pill sentinel and the single exception.
+Eleven radius tokens, four modes: a nine-step scale for surfaces and two role tokens
+for controls. Every value is a multiple of 4; `full` (9999) is the pill sentinel and
+the single exception.
 
 | Token | Soft | Crisp | Sharp | Rounded |
 |---|---|---|---|---|
@@ -469,6 +470,27 @@ pill sentinel and the single exception.
 | `radius/2xl` | 24 | 20 | 8 | 32 |
 | `radius/3xl` | 32 | 24 | 12 | 32 |
 | `radius/full` | pill | pill | pill | pill |
+| `radius/control` | 12 | 4 | 0 | pill |
+| `radius/control-multiline` | → `radius/control` | → `radius/control` | → `radius/control` | 24 |
+
+**Control radius is constant across sizes.** Every single-line control — Button,
+Input, Number Input, the Color Picker field — takes `radius/control` at SM, MD and
+LG alike, so a button beside a field always has the same corner. The scale above is
+for surfaces: cards, panels, media, skeleton blocks.
+
+A size-proportional ladder was the earlier approach and was dropped. A constant
+radius-to-height ratio is unreachable on a 4pt grid: with control heights of 32, 40
+and 48, the only multiples of 4 that hold one ratio are 16/20/24 (a pill) and
+32/40/48; anything in between drifts, and Crisp's old 4/8/12 drifted by a factor of
+two. Density widens the drift further, because it moves height and not radius. Side
+by side, the eye does not read the ratio — it reads whether the silhouette is the
+same, and a constant radius keeps it the same. Rounded is `full` rather than a
+number because only a pill survives Comfortable's 36/48/56 heights.
+
+`radius/control-multiline` is for Textarea. In Soft, Crisp and Sharp it is an
+alias of `radius/control`, not a copy of its numbers, so the two cannot drift
+apart. Only Rounded carries its own value: a pill cannot hold several lines of
+text, so a Textarea next to a pill field takes 24 instead.
 
 **Soft** is the house default. **Crisp** tightens it for dense product UI. **Sharp**
 reads institutional — banking, enterprise, technical. **Rounded** reads consumer —
