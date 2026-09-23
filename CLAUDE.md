@@ -70,3 +70,26 @@ Some things in the Figma file exist only because of its renderer and are
 deliberately not reproduced in code. Before porting, check DESIGN-SYSTEM §10.
 Known cases: the bg/surface fill on Outline and Ghost in Focus; clipsContent
 on Focus variants; Smart Animate tweening the palette on the loading flip.
+
+## Pull request description
+
+Always this structure, English, facts only. No narrative, no history
+of how a decision was reached, no findings unless they changed the
+outcome. Target: under 15 lines, tables excluded.
+
+    <One sentence: what this PR does.>
+
+    ## Changes
+    - <file or area>: <what changed>
+
+    ## Why
+    <1–3 sentences. Only decisions that are not obvious from the diff.>
+
+    ## Verified
+    <Commands run and checks done.>
+
+    ## Not in this PR
+    <Optional. Deferred work and the state main is left in.>
+
+Save the description to the repository root as PR.md (gitignored),
+not to a temp folder.
