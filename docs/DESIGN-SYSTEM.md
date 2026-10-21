@@ -456,7 +456,7 @@ scale. It is a literal 2px, and the only value in the system allowed to sit off 
 ### 4.5 Shape — the roundness dial
 
 Eleven radius tokens, four modes: a nine-step scale for surfaces and two role tokens
-for controls. Every value is a multiple of 4; `full` (9999) is the pill sentinel and
+for controls — one for actions, one for fields. Every value is a multiple of 4; `full` (9999) is the pill sentinel and
 the single exception.
 
 | Token | Soft | Crisp | Sharp | Rounded |
@@ -471,12 +471,13 @@ the single exception.
 | `radius/3xl` | 32 | 24 | 12 | 32 |
 | `radius/full` | pill | pill | pill | pill |
 | `radius/control` | 12 | 4 | 0 | pill |
-| `radius/control-multiline` | → `radius/control` | → `radius/control` | → `radius/control` | 24 |
+| `radius/field` | → `radius/control` | → `radius/control` | → `radius/control` | 12 |
 
-**Control radius is constant across sizes.** Every single-line control — Button,
-Input, Number Input, the Color Picker field — takes `radius/control` at SM, MD and
-LG alike, so a button beside a field always has the same corner. The scale above is
-for surfaces: cards, panels, media, skeleton blocks.
+**Control radius is constant across sizes.** A control takes one of two role
+tokens at SM, MD and LG alike. Actions — Button, Toggle — take `radius/control`.
+Fields — Input, Number Input, the Color Picker field, Textarea — take
+`radius/field`. The scale above is for surfaces: cards, panels, media, skeleton
+blocks.
 
 A size-proportional ladder was the earlier approach and was dropped. A constant
 radius-to-height ratio is unreachable on a 4pt grid: with control heights of 32, 40
@@ -487,10 +488,14 @@ by side, the eye does not read the ratio — it reads whether the silhouette is 
 same, and a constant radius keeps it the same. Rounded is `full` rather than a
 number because only a pill survives Comfortable's 36/48/56 heights.
 
-`radius/control-multiline` is for Textarea. In Soft, Crisp and Sharp it is an
-alias of `radius/control`, not a copy of its numbers, so the two cannot drift
-apart. Only Rounded carries its own value: a pill cannot hold several lines of
-text, so a Textarea next to a pill field takes 24 instead.
+`radius/field` is for fields. In Soft, Crisp and Sharp it is an alias of
+`radius/control`, not a copy of its numbers, so a button beside a field keeps the
+same corner and the two cannot drift apart. Only Rounded splits them: actions stay
+pills, fields take 12. A pill field reads as a button, pushes the label and the value
+out of line, and leaves no room for a trailing affordance such as the Number Input
+steppers. 12 is the largest value on the 4 grid that stays below half the lowest
+field — SM in Compact, 28 — so no field turns into a pill at any density. The same
+value serves Textarea, so single-line and multi-line fields share a corner.
 
 **Soft** is the house default. **Crisp** tightens it for dense product UI. **Sharp**
 reads institutional — banking, enterprise, technical. **Rounded** reads consumer —
