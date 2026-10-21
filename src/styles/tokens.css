@@ -431,7 +431,7 @@
   --radius-3xl: var(--p-radius-32);
   --radius-full: var(--p-radius-9999);
   --radius-control: var(--p-radius-12);
-  --radius-control-multiline: var(--radius-control);
+  --radius-field: var(--radius-control);
   /* typography: Studio (default) */
   --display-2xl-size: var(--p-font-size-72);
   --display-2xl-line-height: var(--p-line-height-80);
@@ -1111,7 +1111,7 @@
   --radius-3xl: var(--p-radius-32);
   --radius-full: var(--p-radius-9999);
   --radius-control: var(--p-radius-12);
-  --radius-control-multiline: var(--radius-control);
+  --radius-field: var(--radius-control);
 }
 
 [data-shape="crisp"] {
@@ -1125,7 +1125,7 @@
   --radius-3xl: var(--p-radius-24);
   --radius-full: var(--p-radius-9999);
   --radius-control: var(--p-radius-4);
-  --radius-control-multiline: var(--radius-control);
+  --radius-field: var(--radius-control);
 }
 
 [data-shape="sharp"] {
@@ -1139,7 +1139,7 @@
   --radius-3xl: var(--p-radius-12);
   --radius-full: var(--p-radius-9999);
   --radius-control: var(--p-radius-0);
-  --radius-control-multiline: var(--radius-control);
+  --radius-field: var(--radius-control);
 }
 
 [data-shape="rounded"] {
@@ -1153,7 +1153,7 @@
   --radius-3xl: var(--p-radius-32);
   --radius-full: var(--p-radius-9999);
   --radius-control: var(--p-radius-9999);
-  --radius-control-multiline: var(--p-radius-24);
+  --radius-field: var(--p-radius-12);
 }
 
 [data-type="studio"] {
