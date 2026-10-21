@@ -9,7 +9,8 @@ Variant axes change appearance. Component properties change content. Anything ma
 
 **Where the tokens live.** Colour tokens (`bg/*`, `text/*`, `icon/*`, `border/*`)
 come from `3. Theme`. Spacing and sizing (`space/*`, `size/*`, `border-width/*`) come
-from `4. Space & Size`. Corner radii (`radius/*`) come from `5. Shape`. Text styles
+from `4. Space & Size`. Corner radii (`radius/*`) come from `5. Shape`: actions take
+`radius/control`, fields take `radius/field`, surfaces a step of the scale. Text styles
 resolve their typeface from `6. Typography`. Token names below are unqualified
 because they are unique across collections.
 

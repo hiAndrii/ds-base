@@ -137,8 +137,8 @@ Work from the question, not from the palette.
 | Padding inside a card | `space/lg` |
 | Gap between page sections | `space/3xl` |
 | Control height | `size/control/sm|md|lg` |
-| Corner of a control (button, field) — the same at every size | `radius/control` |
-| Corner of a multi-line field (Textarea) | `radius/control-multiline` |
+| Corner of an action (Button, Toggle) — the same at every size | `radius/control` |
+| Corner of a field (Input, Number Input, Color Picker field, Textarea) — the same at every size | `radius/field` |
 | Corner of a card, panel or media | a step of the scale, `radius/xs` … `radius/3xl` |
 | Icon inside a control | `size/icon/sm|md|lg` |
 
@@ -219,9 +219,9 @@ for (const k of ['topLeftRadius','topRightRadius','bottomLeftRadius','bottomRigh
   node.setBoundVariable(k, V['radius/control']);
 ```
 
-Corner radius must be bound per corner. `cornerRadius` is not bindable. A control
-takes `radius/control` whatever its size; the `radius/xs` … `radius/3xl` scale is
-for surfaces.
+Corner radius must be bound per corner. `cornerRadius` is not bindable. An action
+takes `radius/control` and a field takes `radius/field`, whatever the size; the
+`radius/xs` … `radius/3xl` scale is for surfaces.
 
 ### Pin modes on a frame
 
@@ -313,8 +313,8 @@ In this order. Skipping step 1 is what produces components that break on re-skin
    semantic token. Create the missing ones **before drawing**.
 2. Choose variant axes — appearance rules only. Content is a component property.
 3. Build with auto-layout. Fixed height from `size/control/*`; padding and gap from
-   `space/*`; radius from `radius/control` for a control, from the `radius/*` scale
-   for a surface.
+   `space/*`; radius from `radius/control` for an action, `radius/field` for a
+   field, from the `radius/*` scale for a surface.
 4. Add properties: `TEXT` labels, `BOOLEAN` optional parts, `INSTANCE_SWAP` icons.
    Add them to each variant component **before** `combineAsVariants`.
 5. After `combineAsVariants`, position every child — they stack at (0,0) otherwise —
